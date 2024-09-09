@@ -53,32 +53,37 @@ export default {
   methods: {
     async login() {
       try {
-        // Wysyłanie żądania POST do serwera
+        // Sending a POST request to the server
         const response = await fetch('http://127.0.0.1:8000/login', {
           method: 'POST',
           headers: {
-            'Content-Type': 'text/plain',
+            'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
           body: JSON.stringify({
-            email: this.username,
-            password: this.password
+            "email": this.username,
+            "password": this.password
           })
         });
 
-        // Sprawdzanie, czy odpowiedź serwera jest prawidłowa
+        // Checking if the server response is valid
         if (!response.ok) {
-          throw new Error('Błąd logowania. Sprawdź swoje dane.');
+          throw new Error('Login failed. Please check your credentials.');
         }
 
-        // Przetwarzanie odpowiedzi z serwera
+        // Processing the response from the server
         const data = await response.json();
-        alert(`Zalogowano jako: ${data.email}`);
-        // Można przekierować użytkownika na stronę po udanym logowaniu
-        // this.$router.push('/user-dashboard/calendar'); // Usuń komentarz i dostosuj, jeśli to konieczne
+        alert(`Logged in as: ${data.first_name} ${data.last_name}`);
+        
+        // Using 'this' to call the correct methods
+        if (data.is_admin) {
+          this.loginAsAdmin();
+        } else {
+          this.loginAsUser();
+        }
 
       } catch (error) {
-        alert(`Błąd: ${error.message}`);
+        alert(`Error: ${error.message}`);
       }
     },
     loginAsUser() {
