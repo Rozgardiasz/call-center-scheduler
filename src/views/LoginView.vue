@@ -76,6 +76,7 @@ export default {
         alert(`Logged in as: ${data.first_name} ${data.last_name}`);
         
         // Using 'this' to call the correct methods
+        sessionStorage.setItem('token', data.token); 
         if (data.is_admin) {
           this.loginAsAdmin();
         } else {
