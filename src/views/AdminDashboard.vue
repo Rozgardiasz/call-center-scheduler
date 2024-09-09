@@ -2,10 +2,9 @@
   <div class="auth-wrapper d-flex flex-column">
     <!-- First Navbar Section -->
     <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
-      <div class="container-fluid">
-        <router-link to="/admin-dashboard/manage-employees" class="dashboard-link">Dashboard</router-link>
-        <router-link to="/" class="dashboard-link">Wyloguj</router-link> <!-- Dodany link "Wyloguj" -->
-
+      <div class="container-fluid d-flex justify-content-between">
+        <router-link to="/" class="dashboard-link logout-link">Wyloguj</router-link> <!-- Przesunięty link "Wyloguj" -->
+        <router-link to="/admin-dashboard/manage-employees" class="dashboard-link ml-auto">Dashboard</router-link>
       </div>
     </nav>
     
@@ -67,6 +66,14 @@ export default {
   text-decoration: none !important; /* Usunięcie podkreślenia */
 }
 
+.logout-link {
+  margin-right: auto; /* Wyjustowanie do lewej strony */
+}
+
+.ml-auto {
+  margin-left: auto; /* Margines automatyczny po lewej stronie */
+}
+
 .navbar-nav {
   display: flex; /* Wyświetlanie elementów listy obok siebie */
   justify-content: center; /* Wyśrodkowanie elementów na liście */
@@ -96,8 +103,6 @@ export default {
   padding: 20px; /* Dodanie odstępu dla lepszej prezentacji treści */
   
   margin-top: 0;
-margin-bottom: 0;
-margin-left: auto;
-margin-right: auto;
+  margin-bottom: 0;
 }
 </style>

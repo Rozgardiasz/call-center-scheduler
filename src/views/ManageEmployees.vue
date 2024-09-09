@@ -1,9 +1,8 @@
 <template>
-  <div class="auth-wrapper">
-    <div class="auth-inner">
-      <h1>Zarządzanie Pracownikami</h1>
-
-      <!-- Formularz dodawania nowego pracownika -->
+  <div class="page-container">
+    <!-- Panel dodawania przeciwnika po lewej, zajmuje 25% wysokości -->
+    <div class="add-employee-panel">
+      <h1>Dodaj Pracownika</h1>
       <form @submit.prevent="addEmployee">
         <div class="form-group">
           <input
@@ -44,24 +43,42 @@
           />
         </div>
 
+        <!-- Ustawienia godzin pracy dla każdego dnia tygodnia -->
+        <div class="working-hours">
+          <h2>Godziny pracy</h2>
+          <div v-for="day in daysOfWeek" :key="day" class="day-row">
+            <label>{{ day }}:</label>
+            <select v-model="newEmployee.workingHours[day].start" class="form-control">
+              <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+            </select>
+            <select v-model="newEmployee.workingHours[day].duration" class="form-control">
+              <option value="4">4h</option>
+              <option value="8">8h</option>
+            </select>
+          </div>
+        </div>
+
         <button type="submit" class="btn btn-primary btn-block">Dodaj Pracownika</button>
       </form>
+    </div>
 
-      <!-- Lista pracowników -->
+    <!-- Lista pracowników po prawej, zajmuje 75% szerokości -->
+    <div class="employee-list-panel">
+      <h1>Lista Pracowników</h1>
       <ul class="employee-list">
         <li v-for="(employee, index) in employees" :key="index" class="employee-item">
           {{ employee.name }} ({{ employee.email }})
           <button @click="confirmRemoveEmployee(index)" class="btn btn-danger">Usuń</button>
         </li>
       </ul>
+    </div>
 
-      <!-- Modal potwierdzenia usunięcia -->
-      <div v-if="showConfirmModal" class="confirm-modal">
-        <div class="confirm-modal-content">
-          <p>Czy na pewno chcesz usunąć tego pracownika?</p>
-          <button @click="removeEmployee(confirmedIndex)" class="btn btn-danger">Tak</button>
-          <button @click="cancelRemoveEmployee" class="btn btn-secondary">Anuluj</button>
-        </div>
+    <!-- Modal potwierdzenia usunięcia -->
+    <div v-if="showConfirmModal" class="confirm-modal">
+      <div class="confirm-modal-content">
+        <p>Czy na pewno chcesz usunąć tego pracownika?</p>
+        <button @click="removeEmployee(confirmedIndex)" class="btn btn-danger">Tak</button>
+        <button @click="cancelRemoveEmployee" class="btn btn-secondary">Anuluj</button>
       </div>
     </div>
   </div>
@@ -76,20 +93,32 @@ export default {
         name: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        workingHours: {
+          Mon: { start: '', duration: '8' },
+          Tue: { start: '', duration: '8' },
+          Wed: { start: '', duration: '8' },
+          Thu: { start: '', duration: '8' },
+          Fri: { start: '', duration: '8' },
+          Sat: { start: '', duration: '8' },
+          Sun: { start: '', duration: '8' }
+        }
       },
       employees: [],
       showConfirmModal: false,
-      confirmedIndex: null
+      confirmedIndex: null,
+      daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      hours: Array.from({ length: 24 }, (v, k) => `${k}:00`) // Generowanie godzin od 0:00 do 23:00
     };
   },
   methods: {
     addEmployee() {
       if (this.newEmployee.name && this.newEmployee.email && this.newEmployee.password) {
         if (this.newEmployee.password === this.newEmployee.confirmPassword) {
-          this.employees.push({ 
-            name: this.newEmployee.name, 
-            email: this.newEmployee.email 
+          this.employees.push({
+            name: this.newEmployee.name,
+            email: this.newEmployee.email,
+            workingHours: { ...this.newEmployee.workingHours }
           });
           this.resetForm();
         } else {
@@ -104,6 +133,15 @@ export default {
       this.newEmployee.email = '';
       this.newEmployee.password = '';
       this.newEmployee.confirmPassword = '';
+      this.newEmployee.workingHours = {
+        Mon: { start: '', duration: '8' },
+        Tue: { start: '', duration: '8' },
+        Wed: { start: '', duration: '8' },
+        Thu: { start: '', duration: '8' },
+        Fri: { start: '', duration: '8' },
+        Sat: { start: '', duration: '8' },
+        Sun: { start: '', duration: '8' }
+      };
     },
     confirmRemoveEmployee(index) {
       this.showConfirmModal = true;
@@ -123,53 +161,77 @@ export default {
 </script>
 
 <style scoped>
-.auth-wrapper {
+.page-container {
   display: flex;
-  min-width: 500px;
-  align-items: center;
-  justify-content: center;
-  height: 70vh;
+  margin-top: 250px;
+  height: 550%; /* Ustawienie pełnej wysokości ekranu */
   background-color: #f7f7f7;
-  margin-top: 50px; /* Dodanie marginesu z góry */
 }
 
-.auth-inner {
+.add-employee-panel {
+  flex-basis: 30%;
+  height: 15%; /* Panel ma zajmować 25% wysokości */
+  padding: 30px;
   background-color: #ffffff;
-  padding: 50px;
-  border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 500px;
-  text-align: center; /* Wyśrodkowanie zawartości formularza */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  border-right: 1px solid #ddd;
+}
+
+.employee-list-panel {
+  flex-basis: 70%;
+  padding: 20px;
+  background-color: #f1f1f1;
+  overflow-y: auto;
+}
+
+.employee-list-panel h1 {
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.employee-list {
+  list-style: none;
+  padding: 0;
+}
+
+.employee-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 h1 {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   text-align: center;
-  font-size: 2rem;
+  font-size: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Wyśrodkowanie elementów wewnątrz grupy formularza */
+  margin-bottom: 15px;
+  width: 100%;
 }
 
-input {
+input, select {
   width: 100%;
-  max-width: 300px; /* Ustawienie maksymalnej szerokości pól */
-  font-size: 1.2rem;
-  padding: 12px;
-  margin: 0 auto; /* Wyśrodkowanie pól */
+  padding: 10px;
+  font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 4px;
+  margin-bottom: 10px;
 }
 
 .btn-block {
   width: 100%;
-  padding: 15px;
-  font-size: 1.2rem;
+  padding: 10px;
+  font-size: 1.1rem;
 }
 
 .btn-primary {
@@ -182,37 +244,31 @@ input {
   border-color: #004085;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-  border-color: #545b62;
-}
-
 .btn-danger {
   background-color: #dc3545;
   border-color: #dc3545;
 }
 
-.btn-danger:hover {
-  background-color: #c82333;
-  border-color: #bd2130;
+.working-hours {
+  margin-top: 10px;
+  max-width: 300px;
+  width: 100%;
 }
 
-.employee-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 20px;
-}
-
-.employee-item {
-  margin-bottom: 10px;
+.day-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
+}
+
+.day-row label {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.day-row select {
+  flex: 2;
 }
 
 .confirm-modal {
