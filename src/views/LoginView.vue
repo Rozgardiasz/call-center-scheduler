@@ -1,4 +1,3 @@
-<!-- src/views/Login.vue -->
 <template>
   <div class="auth-wrapper">
     <div class="auth-inner">
@@ -52,8 +51,35 @@ export default {
     };
   },
   methods: {
-    login() {
-      alert(`Zalogowano jako: ${this.username}`);
+    async login() {
+      try {
+        // Wysyłanie żądania POST do serwera
+        const response = await fetch('http://127.0.0.1:8000/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            email: this.username,
+            password: this.password
+          })
+        });
+
+        // Sprawdzanie, czy odpowiedź serwera jest prawidłowa
+        if (!response.ok) {
+          throw new Error('Błąd logowania. Sprawdź swoje dane.');
+        }
+
+        // Przetwarzanie odpowiedzi z serwera
+        const data = await response.json();
+        alert(`Zalogowano jako: ${data.email}`);
+        // Można przekierować użytkownika na stronę po udanym logowaniu
+        // this.$router.push('/user-dashboard/calendar'); // Usuń komentarz i dostosuj, jeśli to konieczne
+
+      } catch (error) {
+        alert(`Błąd: ${error.message}`);
+      }
     },
     loginAsUser() {
       this.$router.push('/user-dashboard/calendar');
@@ -64,6 +90,8 @@ export default {
   }
 };
 </script>
+
+
 
 <style scoped>
 .auth-wrapper {

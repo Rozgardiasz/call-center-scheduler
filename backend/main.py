@@ -8,10 +8,30 @@ import schemas
 import crud
 from auth import get_current_active_admin, get_current_user, create_jwt_token
 
-from database import SessionLocal
+from database import SessionLocal, Base, engine
+
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 
+# List of allowed origins
+origins = [
+    "http://localhost:8080"
+]
+
+# Adding CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # Allows these origins
+    allow_credentials=True,  # Allows sending cookies with cross-origin requests
+    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers (e.g., Authorization)
+)
+
+
+
+Base.metadata.create_all(bind=engine)
 
 # Dependency
 def get_db():
