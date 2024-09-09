@@ -27,7 +27,7 @@ async def login(credentials: schemas.EmployeeLogin, db: Session = Depends(get_db
     user = crud.authenticate_user(db, credentials)
     if user:
         token = create_jwt_token({"user_id": user.id})
-        return {"token": token}
+        return {"token": token, "is_admin" : user.is_admin, "first_name" : user.first_name, "last_name" : user.last_name}
     raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
