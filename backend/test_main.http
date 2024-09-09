@@ -1,0 +1,68 @@
+# Test your FastAPI endpoints
+
+
+POST http://127.0.0.1:8000/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "kowalski.doe@example.com",
+    "password": "secure_password"
+}
+
+###
+POST http://127.0.0.1:8000/holiday_request
+Authorization: Bearer {{jws}}}
+Content-Type: application/json
+
+{
+    "employee_id": 1,
+    "vacation_start": "2024-09-01",
+    "vacation_end": "2024-09-10",
+    "type_of_vacation": "annual"
+}
+
+###
+
+POST http://127.0.0.1:8000/admin/add_user
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJleHAiOjE3MjU4NzMwMTh9.AIsEaH_vezxu9ne_rK8AwyOOIZpZV7kjhHPMmhBv9nE
+Accept: application/json
+
+{
+    "first_name": "Kowalski",
+    "last_name": "Doe",
+    "email": "kowalski.doe@example.com",
+    "password": "secure_password",
+    "is_admin": false,
+    "work_hours": [
+        {
+            "weekday": "Monday",
+            "start_time": "09:00:00",
+            "end_time": "17:00:00"
+        },
+        {
+            "weekday": "Tuesday",
+            "start_time": "09:00:00",
+            "end_time": "17:00:00"
+        }
+    ]
+}
+
+###
+
+POST http://127.0.0.1:8000/holiday_request
+Content-Type: application/json
+Accept: application/json
+
+{
+    "employee_id": 1,
+    "vacation_start": "2024-09-10",
+    "vacation_end": "2024-09-15",
+    "type_of_vacation": "Annual Leave"
+}
+
+###
+
+GET http://127.0.0.1:8000/working_hours
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJleHAiOjE3MjU5MDM5NDB9.CiOQRpYpCQa-wMyP5tY0P3K3evlngg2AeWExsY2JW60
