@@ -2,11 +2,13 @@
   <div class="calendar-wrapper">
     <vue-cal
       :events="events"
-      :disable-time="true"
+      :disable-time="false" 
       @cell-click="createEvent"
       @view-change="handleViewChange"
-      :views="['day', 'week', 'month', 'year']"
+      :views="['day', 'week', 'month']"
       default-view="week"
+      :min-date="minDate"
+      :max-date="maxDate"
       style="height: 800px;"
     />
   </div>
@@ -23,41 +25,67 @@ export default {
   },
   data() {
     return {
-      events: [
-        {
-          start: '2024-06-10T00:00:00',
-          end: '2024-06-11T00:00:00', // Full-day event: start at 2024-06-10 00:00 and end at 2024-06-11 00:00
-          title: 'Vacation Start'
-        },
-        {
-          start: '2024-06-14T00:00:00',
-          end: '2024-06-15T00:00:00', // Full-day event
-          title: 'Meeting'
-        }
-      ]
+      events: [],
+      minDate: '',
+      maxDate: ''
     }
   },
+  created() {
+    this.setCurrentMonth();
+    const today = new Date();
+    this.addWorkHours(today, 9, 17);
+  },
   methods: {
+    setCurrentMonth() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+
+      const firstDayOfMonth = new Date(year, month, 1);
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+
+      this.minDate = this.formatDate(firstDayOfMonth);
+      this.maxDate = this.formatDate(lastDayOfMonth);
+    },
+    formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    },
     createEvent(date, allDay, event, view) {
       if (view === 'day' || view === 'week') {
-        const title = prompt('Event title:')
+        const title = prompt('Event title:');
         if (title) {
-          const startDate = new Date(date)
-          startDate.setHours(0, 0, 0, 0) // Start at midnight
-          const endDate = new Date(startDate)
-          endDate.setDate(endDate.getDate() + 1) // End at midnight the next day
+          const startDate = new Date(date);
+          startDate.setHours(0, 0, 0, 0);
+          const endDate = new Date(startDate);
+          endDate.setDate(endDate.getDate() + 1);
           this.events.push({
             start: startDate,
             end: endDate,
-            title: title
-          })
+            title: title,
+            class: 'blue-background'  
+          });
         }
       }
     },
     handleViewChange({ view }) {
-      // Handle view changes if needed
-      // For now, this method just logs the current view
-      console.log('Current view:', view)
+      console.log('Current view:', view);
+    },
+    addWorkHours(date, startHour, endHour) {
+      const startDate = new Date(date);
+      const endDate = new Date(date);
+
+      startDate.setHours(startHour, 0, 0, 0);
+      endDate.setHours(endHour, 0, 0, 0);
+
+      this.events.push({
+        start: startDate,
+        end: endDate,
+        title: 'Godziny Pracy',
+        class: 'blue-background'  
+      });
     }
   }
 }
@@ -68,4 +96,21 @@ export default {
   min-width: 1600px;
   margin: 0 auto;
 }
+
+
+.vuecal__event.blue-background {
+  background-color: #007bff !important; 
+  color: white !important;              
+}
+
+
+.vuecal__event-content.blue-background {
+  color: white !important;              
+}
+
+.vuecal__event.blue-background .vuecal__event-content {
+  background-color: #007bff !important;
+  color: white !important;
+}
 </style>
+
