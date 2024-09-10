@@ -172,15 +172,28 @@ methods: {
     }
   },
   getWorkHoursWithEndTimes() {
-    return Object.keys(this.newEmployee.workingHours).map(day => {
-      const workHour = this.newEmployee.workingHours[day];
+  return Object.keys(this.newEmployee.workingHours).map(day => {
+    const workHour = this.newEmployee.workingHours[day];
+    
+    // Sprawdzamy, czy pole start jest puste
+    if (!workHour.start) {
+      // Jeśli jest puste, zwracamy tylko dzień bez godzin pracy
       return {
         weekday: day,
-        start_time: workHour.start,
-        end_time: this.calculateEndTime(workHour.start, workHour.duration)
+        start_time: null,  // Można nie dodawać tych pól, ale lepiej jawnie
+        end_time: null     // Informować, że są puste
       };
-    });
-  }
+    }
+
+    // Jeśli pole start nie jest puste, obliczamy godziny pracy
+    return {
+      weekday: day,
+      start_time: workHour.start,
+      end_time: this.calculateEndTime(workHour.start, workHour.duration)
+    };
+  }).filter(day => day.start_time && day.end_time);  // Usuwamy puste wartości z wyniku
+}
+
 }
 };
 </script>
