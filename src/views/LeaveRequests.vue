@@ -5,8 +5,16 @@
       
       <!-- Lista wniosków -->
       <ul class="requests-list">
-        <li v-for="(request, index) in leaveRequests" :key="index" class="request-item">
-          {{ request.employeeName }} - {{ request.type }} od {{ request.startDate }} do {{ request.endDate }}
+        <li 
+          v-for="(request, index) in leaveRequests" 
+          :key="index" 
+          :class="{
+            'request-item': true,
+            'can-approve': canBeApproved(request),
+            'cannot-approve': !canBeApproved(request)
+          }"
+        >
+          {{ request.employee.first_name }} {{ request.employee.last_name }} - {{ request.type_of_vacation }} od {{ request.vacation_start }} do {{ request.vacation_end }}
           <button @click="confirmApproveRequest(index)" class="btn btn-success">Akceptuj</button>
           <button @click="confirmRejectRequest(index)" class="btn btn-danger">Odrzuć</button>
         </li>
@@ -33,21 +41,66 @@
   </div>
 </template>
 
+
 <script>
 export default {
   name: 'LeaveRequests',
   data() {
     return {
-      leaveRequests: [
-        { employeeName: 'Jan Kowalski', type: 'Urlop', startDate: '2024-09-01', endDate: '2024-09-07' },
-        { employeeName: 'Anna Nowak', type: 'Dzień Wolny', startDate: '2024-09-15', endDate: '2024-09-15' }
-      ],
+      leaveRequests: [], // Empty initially, will be fetched from the API
       showConfirmApproveModal: false,
       showConfirmRejectModal: false,
       confirmedIndex: null
     };
   },
+  async created() {
+    await this.fetchPendingHolidays();
+  },
   methods: {
+    // Fetch pending holidays and map employee data
+    async fetchPendingHolidays() {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/holidays/pending', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!response.ok) throw new Error('Failed to fetch pending holidays');
+        
+        let holidays = await response.json();
+        
+        // Fetch employee details for each holiday request
+        holidays = await Promise.all(
+          holidays.map(async (holiday) => {
+            const employeeResponse = await fetch(`http://127.0.0.1:8000/holidays/${holiday.employee_id}`, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            if (!employeeResponse.ok) throw new Error('Failed to fetch employee data');
+            
+            const employee = await employeeResponse.json();
+            return { ...holiday, employee }; // Combine holiday and employee data
+          })
+        );
+
+        this.leaveRequests = holidays;
+      } catch (error) {
+        console.error('Error fetching holidays:', error);
+      }
+    },
+
+    // Check if a request can be approved (custom logic can be applied here)
+    canBeApproved(request) {
+      // Placeholder logic, adjust this to your approval conditions
+      return request.status === 'pending';
+    },
+
+    // Handle approval actions
     confirmApproveRequest(index) {
       this.showConfirmApproveModal = true;
       this.confirmedIndex = index;
@@ -56,13 +109,15 @@ export default {
       this.showConfirmRejectModal = true;
       this.confirmedIndex = index;
     },
-    approveRequest(index) {
+    async approveRequest(index) {
+      // Call your approval API here (this is a placeholder)
       this.leaveRequests.splice(index, 1);
       this.showConfirmApproveModal = false;
       this.confirmedIndex = null;
       alert('Wniosek został zaakceptowany.');
     },
-    rejectRequest(index) {
+    async rejectRequest(index) {
+      // Call your rejection API here (this is a placeholder)
       this.leaveRequests.splice(index, 1);
       this.showConfirmRejectModal = false;
       this.confirmedIndex = null;
@@ -78,6 +133,8 @@ export default {
     }
   }
 };
+
+
 </script>
 
 <style scoped>
@@ -89,6 +146,53 @@ export default {
   height: 70vh;
   background-color: #f7f7f7;
   margin-top: 50px; /* Dodanie marginesu z góry */
+}
+
+.requests-wrapper {
+  padding: 20px;
+}
+
+.requests-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.request-item {
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.can-approve {
+  background-color: #d4edda; /* Light green for approvable requests */
+}
+
+.cannot-approve {
+  background-color: #f8d7da; /* Light red for non-approvable requests */
+}
+
+.btn {
+  margin-left: 10px;
+}
+
+.confirm-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.confirm-modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
 }
 
 .requests-inner {
