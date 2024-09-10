@@ -3,8 +3,8 @@
     <!-- First Navbar Section -->
     <nav class="navbar navbar-expand-lg navbar-primary bg-primary"> <!-- Sekcja z niebieskim tłem -->
       <div class="container-fluid">
+        <button @click="logout" class="dashboard-link logout-link">Wyloguj</button>
         <router-link to="/user-dashboard/info" class="dashboard-link">Dashboard</router-link>
-        <router-link to="/" class="dashboard-link">Wyloguj</router-link> <!-- Dodany link "Wyloguj" -->
       </div>
     </nav>
     
@@ -36,7 +36,13 @@
 
 <script>
 export default {
-  name: 'UserDashboard'
+  name: 'UserDashboard',
+  methods: {
+    logout() {
+      sessionStorage.removeItem('token'); // Usuwanie tokena z sessionStorage
+      this.$router.push('/'); // Przekierowanie do strony logowania
+    }
+  }
 };
 </script>
 
@@ -48,6 +54,22 @@ h1 {
 p {
   margin: 0;
   margin-bottom: 10px;
+}
+
+.logout-link {
+  background: none; /* Brak tła */
+  border: none; /* Brak obramowania */
+  color: white; /* Biały kolor tekstu */
+  font-size: 1.5rem; /* Większy rozmiar czcionki */
+  font-weight: 600; /* Pogrubienie tekstu */
+  text-decoration: none; /* Usunięcie podkreślenia */
+  cursor: pointer; /* Zmiana kursora na rękę */
+  padding: 0; /* Brak wewnętrznych marginesów */
+}
+
+.logout-link:hover {
+  color: white; /* Kolor tekstu przy najechaniu */
+  text-decoration: underline; /* Podkreślenie tekstu przy najechaniu */
 }
 
 .navbar-primary {

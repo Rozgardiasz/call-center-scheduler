@@ -3,7 +3,7 @@
     <!-- First Navbar Section -->
     <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
       <div class="container-fluid d-flex justify-content-between">
-        <router-link to="/" class="dashboard-link logout-link">Wyloguj</router-link> <!-- Przesunięty link "Wyloguj" -->
+        <button @click="logout" class="dashboard-link logout-link">Wyloguj</button> <!-- Zmieniono router-link na a z @click -->
         <router-link to="/admin-dashboard/manage-employees" class="dashboard-link ml-auto">Dashboard</router-link>
       </div>
     </nav>
@@ -33,9 +33,16 @@
 
 <script>
 export default {
-  name: 'AdminDashboard'
+  name: 'AdminDashboard',
+  methods: {
+    logout() {
+      sessionStorage.removeItem('token'); // Usuwanie tokena z sessionStorage
+      this.$router.push('/'); // Przekierowanie do strony logowania
+    }
+  }
 };
 </script>
+
 
 <style scoped>
 .navbar-primary {
@@ -67,7 +74,19 @@ export default {
 }
 
 .logout-link {
-  margin-right: auto; /* Wyjustowanie do lewej strony */
+  background: none; /* Brak tła */
+  border: none; /* Brak obramowania */
+  color: white; /* Biały kolor tekstu */
+  font-size: 1.5rem; /* Większy rozmiar czcionki */
+  font-weight: 600; /* Pogrubienie tekstu */
+  text-decoration: none; /* Usunięcie podkreślenia */
+  cursor: pointer; /* Zmiana kursora na rękę */
+  padding: 0; /* Brak wewnętrznych marginesów */
+}
+
+.logout-link:hover {
+  color: white; /* Kolor tekstu przy najechaniu */
+  text-decoration: underline; /* Podkreślenie tekstu przy najechaniu */
 }
 
 .ml-auto {
