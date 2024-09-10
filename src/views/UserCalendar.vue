@@ -2,7 +2,7 @@
   <div class="calendar-wrapper">
     <vue-cal
       :events="events"
-      :disable-time="false" 
+      :disable-time="false"
       @cell-click="createEvent"
       @view-change="handleViewChange"
       :views="['day', 'week', 'month']"
@@ -13,7 +13,6 @@
     />
   </div>
 </template>
-
 
 <script>
 import VueCal from 'vue-cal'
@@ -33,7 +32,20 @@ export default {
   },
   async created() {
     this.setCurrentMonth();
-    await this.fetchWorkHoursAndAddEvents();  // Pobieramy godziny pracy
+    await this.fetchWorkHoursAndAddEvents();  
+    
+
+const startDate = '2024-09-10';
+let endDate = new Date('2024-09-12');
+
+
+endDate.setDate(endDate.getDate() + 1);
+
+
+const endDateStr = endDate.toISOString().split('T')[0];
+
+
+this.addVacations(startDate, endDateStr);
   },
   methods: {
     setCurrentMonth() {
@@ -55,7 +67,7 @@ export default {
     },
     async fetchWorkHoursAndAddEvents() {
       try {
-        const token = sessionStorage.getItem('token');  // Pobierz token
+        const token = sessionStorage.getItem('token');
         const response = await fetch('http://127.0.0.1:8000/working_hours', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -67,31 +79,26 @@ export default {
         }
 
         const data = await response.json();
-        this.addWorkHoursForWeeks(data.work_hours);  // Dodaj godziny pracy na obecny tydzień i kolejne 3 tygodnie
+        this.addWorkHoursForWeeks(data.work_hours);
       } catch (error) {
         console.error('Error fetching work hours:', error);
       }
     },
     addWorkHoursForWeeks(workHours) {
-      // Pobieramy obecny tydzień
       const currentDate = new Date();
-      const currentDay = currentDate.getDay();  // Dzień tygodnia (0 = Niedziela, 1 = Poniedziałek, ...)
+      const currentDay = currentDate.getDay(); 
 
-      // Iteracja przez obecny tydzień i 3 tygodnie do przodu
       for (let weekOffset = 0; weekOffset <= 3; weekOffset++) {
         workHours.forEach(workHour => {
-          const weekday = this.getWeekdayNumber(workHour.weekday);  // Zmapuj nazwę dnia na numer (Poniedziałek = 1, itd.)
-          const diffDays = weekday - currentDay + (weekOffset * 7);  // Dodaj różnicę w dniach oraz przesunięcie o tygodnie
+          const weekday = this.getWeekdayNumber(workHour.weekday);  
+          const diffDays = weekday - currentDay + (weekOffset * 7);  
 
-          // Ustal datę dla tego dnia w bieżącym tygodniu i kolejnych tygodniach
           const workDayDate = new Date(currentDate);
           workDayDate.setDate(currentDate.getDate() + diffDays);
 
-          // Utwórz daty startu i zakończenia wydarzenia
           const startTime = this.createDateWithTime(workDayDate, workHour.start_time);
           const endTime = this.createDateWithTime(workDayDate, workHour.end_time);
 
-          // Dodaj wydarzenie do kalendarza z klasą `orange-background`
           this.events.push({
             start: startTime,
             end: endTime,
@@ -120,54 +127,92 @@ export default {
       return newDate;
     },
     createEvent(date, allDay, event, view) {
-    if (view === 'day' || view === 'week') {
-      const title = prompt('Event title:');
-      if (title) {
-        const startDate = new Date(date);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(startDate);
-        endDate.setDate(endDate.getDate() + 1);
-        this.events.push({
-          start: startDate,
-          end: endDate,
-          title: title,
-          style: {
-            backgroundColor: '#007bff', // Kolor tła wydarzenia
-            color: 'white'              // Kolor tekstu
-          }
-        });
+      if (view === 'day' || view === 'week') {
+        const title = prompt('Event title:');
+        if (title) {
+          const startDate = new Date(date);
+          startDate.setHours(0, 0, 0, 0);
+          const endDate = new Date(startDate);
+          endDate.setDate(endDate.getDate() + 1);
+          this.events.push({
+            start: startDate,
+            end: endDate,
+            title: title,
+            style: {
+              backgroundColor: '#007bff', 
+              color: 'white'            
+            }
+          });
+        }
       }
-    }
-  }
+    },
+
+    addVacations(startDate, endDate) {
+
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+
+ 
+  end.setDate(end.getDate() );
+  
+  end.setHours(0, 0, 0, 0);
+
+
+  this.events = this.events.filter(event => {
+    const eventStart = new Date(event.start);
+    const eventEnd = new Date(event.end);
+
+
+    return !(event.title === 'Godziny Pracy' && (
+      eventStart >= start && eventEnd <= end  
+    ));
+  });
+
+  this.events.push({
+    start: startDate,
+    end: endDate,
+    title: 'Wakacje',
+    class: 'green-background',
+    allDay: true 
+  });
+}
+
+
+
   }
 }
 </script>
 
-
-
-<style >
-
-
+<style>
 .calendar-wrapper {
   min-width: 1600px;
   margin: 0 auto;
 }
 
-.vuecal__title-bar{
-  background-color: #73b0f1 !important; 
+.vuecal__title-bar {
+  background-color: #73b0f1 !important;
 }
 
-
-
-.vuecal__menu{
+.vuecal__menu {
   background-color: #1a73e8;
-  color: white !important;              
+  color: white !important;
 }
 
-.vuecal__event.orange-background,
-.vuecal__event.blue-background {
-  background-color: #73b0f1 !important; 
-  color: white !important;              
+.vuecal__event.orange-background {
+  background-color: #73b0f1 !important;
+  color: white !important;
 }
 
+.vuecal__event.green-background {
+  background-color: #28a745 !important; 
+  color: white !important;
+}
+
+.vuecal__event-content {
+  display: flex;
+  justify-content: center;   
+  align-items: center;     
+  height: 100%;             
+}
 </style>
