@@ -11,6 +11,16 @@ def authenticate_user(db: Session, credentials: schemas.EmployeeLogin):
         return user
     return None
 
+def get_pending_holidays(db: Session):
+    return db.query(Vacation).filter(Vacation.status == 'pending').all()
+
+def get_user_holidays(db: Session, user_id: int):
+    return db.query(Vacation).filter(Vacation.employee_id == user_id).all()
+
+def get_all_users(db: Session):
+    return db.query(Employee).all()
+
+
 
 def add_employee(db: Session, employee_data: schemas.EmployeeCreate) -> Employee:
     # Create and add the employee to the database

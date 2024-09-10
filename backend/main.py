@@ -2,7 +2,7 @@ from datetime import datetime
 
 from fastapi import FastAPI, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-
+from typing import List
 from models import WorkHour
 import schemas
 import crud
@@ -95,6 +95,27 @@ def view_working_hours(request: Request, db: Session = Depends(get_db)):
     current_user = get_current_user(request, db)
     working_hours = db.query(WorkHour).filter(WorkHour.employee_id == current_user.id).all()
     return {"work_hours": working_hours}
+
+
+@app.get("/holidays/pending", response_model=List[schemas.Vacation])
+def get_pending_holidays(request: Request, db: Session = Depends(get_db)):
+    get_current_active_admin(request, db)  # Ensure user is admin
+    pending_holidays = crud.get_pending_holidays(db)
+    return pending_holidays
+
+
+@app.get("/holidays/{user_id}", response_model=List[schemas.Vacation])
+def get_user_holidays(user_id: int, request: Request, db: Session = Depends(get_db)):
+    get_current_active_admin(request, db)  # Ensure user is admin
+    user_holidays = crud.get_user_holidays(db, user_id)
+    return user_holidays
+
+@app.get("/admin/users", response_model=List[schemas.Employee])
+def get_all_users(request: Request, db: Session = Depends(get_db)):
+    get_current_active_admin(request, db)  # Ensure user is admin
+    all_users = crud.get_all_users(db)
+    return all_users
+
 
 
 @app.post("/can_approve_holiday")

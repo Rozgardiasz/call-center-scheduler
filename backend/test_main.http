@@ -12,7 +12,7 @@ Accept: application/json
 
 ###
 POST http://127.0.0.1:8000/holiday_request
-Authorization: Bearer {{jws}}}
+Authorization: Bearer {{jws}}
 Content-Type: application/json
 
 {
