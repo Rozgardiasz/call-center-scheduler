@@ -1,3 +1,4 @@
+now make it so the list of employees is from backend using the endpoint
 <template>
   <div class="page-container">
     <!-- Panel dodawania przeciwnika po lewej, zajmuje 25% wysokości -->
@@ -104,20 +105,39 @@ export default {
           Sun: { start: '', duration: '8' }
         }
       },
-      employees: [],
+      employees: [],  // Store the list of employees here
       showConfirmModal: false,
       confirmedIndex: null,
       daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
       hours: Array.from({ length: 24 }, (v, k) => `${k}:00`) // Generates hours from 0:00 to 23:00
     };
   },
-methods: {
-  calculateEndTime(startTime, duration) {
-    const [hours, minutes] = startTime.split(':').map(Number);
-    const endHours = (hours + Number(duration)) % 24;  // Handle overflow of 24 hours
-    return `${endHours < 10 ? '0' : ''}${endHours}:${minutes < 10 ? '0' : ''}${minutes}`;
+  mounted() {
+    this.fetchEmployees();  // Fetch employees when the component is mounted
   },
-      resetForm() {
+  methods: {
+    async fetchEmployees() {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/admin/users', {
+          headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+          }
+        });
+        if (response.ok) {
+          this.employees = await response.json();
+        } else {
+          throw new Error('Failed to fetch employees');
+        }
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    },
+    calculateEndTime(startTime, duration) {
+      const [hours, minutes] = startTime.split(':').map(Number);
+      const endHours = (hours + Number(duration)) % 24;  // Handle overflow of 24 hours
+      return `${endHours < 10 ? '0' : ''}${endHours}:${minutes < 10 ? '0' : ''}${minutes}`;
+    },
+    resetForm() {
       this.newEmployee.name = '';
       this.newEmployee.email = '';
       this.newEmployee.password = '';
@@ -132,70 +152,88 @@ methods: {
         Sun: { start: '', duration: '8' }
       };
     },
-  async addEmployee() {
-    if (this.newEmployee.name && this.newEmployee.email && this.newEmployee.password) {
-      if (this.newEmployee.password === this.newEmployee.confirmPassword) {
-        try {
-          const employeeData = {
-            first_name: this.newEmployee.name.split(' ')[0],
-            last_name: this.newEmployee.name.split(' ')[1] || '',
-            email: this.newEmployee.email,
-            password: this.newEmployee.password,
-            work_hours: this.getWorkHoursWithEndTimes()  // Now includes end times
-          };
+    async addEmployee() {
+      if (this.newEmployee.name && this.newEmployee.email && this.newEmployee.password) {
+        if (this.newEmployee.password === this.newEmployee.confirmPassword) {
+          try {
+            const employeeData = {
+              first_name: this.newEmployee.name.split(' ')[0],
+              last_name: this.newEmployee.name.split(' ')[1] || '',
+              email: this.newEmployee.email,
+              password: this.newEmployee.password,
+              work_hours: this.getWorkHoursWithEndTimes()  // Now includes end times
+            };
 
-          const response = await fetch('http://127.0.0.1:8000/admin/add_user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-            },
-            body: JSON.stringify(employeeData)
-          });
+            const response = await fetch('http://127.0.0.1:8000/admin/add_user', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+              },
+              body: JSON.stringify(employeeData)
+            });
 
-          if (!response.ok) {
-            throw new Error('Error adding employee');
+            if (!response.ok) {
+              throw new Error('Error adding employee');
+            }
+
+            const data = await response.json();
+            this.employees.push(data);
+            this.resetForm();
+            alert('Employee added successfully');
+          } catch (error) {
+            alert(`Error: ${error.message}`);
           }
-
-          const data = await response.json();
-          this.employees.push(data);
-          this.resetForm();
-          alert('Employee added successfully');
-        } catch (error) {
-          alert(`Error: ${error.message}`);
+        } else {
+          alert('Passwords do not match!');
         }
       } else {
-        alert('Passwords do not match!');
+        alert('All fields are required!');
       }
-    } else {
-      alert('All fields are required!');
+    },
+    getWorkHoursWithEndTimes() {
+      return Object.keys(this.newEmployee.workingHours).map(day => {
+        const workHour = this.newEmployee.workingHours[day];
+        if (!workHour.start) {
+          return { weekday: day, start_time: null, end_time: null };
+        }
+        return {
+          weekday: day,
+          start_time: workHour.start,
+          end_time: this.calculateEndTime(workHour.start, workHour.duration)
+        };
+      }).filter(day => day.start_time && day.end_time);
+    },
+    confirmRemoveEmployee(index) {
+      this.confirmedIndex = index;
+      this.showConfirmModal = true;
+    },
+    async removeEmployee(index) {
+      const employee = this.employees[index];
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/admin/remove_user/${employee.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+          }
+        });
+        if (!response.ok) {
+          throw new Error('Error removing employee');
+        }
+        this.employees.splice(index, 1);
+        this.showConfirmModal = false;
+        alert('Employee removed successfully');
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    },
+    cancelRemoveEmployee() {
+      this.confirmedIndex = null;
+      this.showConfirmModal = false;
     }
-  },
-  getWorkHoursWithEndTimes() {
-  return Object.keys(this.newEmployee.workingHours).map(day => {
-    const workHour = this.newEmployee.workingHours[day];
-    
-    // Sprawdzamy, czy pole start jest puste
-    if (!workHour.start) {
-      // Jeśli jest puste, zwracamy tylko dzień bez godzin pracy
-      return {
-        weekday: day,
-        start_time: null,  // Można nie dodawać tych pól, ale lepiej jawnie
-        end_time: null     // Informować, że są puste
-      };
-    }
-
-    // Jeśli pole start nie jest puste, obliczamy godziny pracy
-    return {
-      weekday: day,
-      start_time: workHour.start,
-      end_time: this.calculateEndTime(workHour.start, workHour.duration)
-    };
-  }).filter(day => day.start_time && day.end_time);  // Usuwamy puste wartości z wyniku
-}
-
-}
+  }
 };
+
 </script>
 
 
