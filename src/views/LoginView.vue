@@ -29,12 +29,6 @@
           <button type="submit" class="btn btn-primary btn-block">
             Zaloguj
           </button>
-          <button type="button" @click="loginAsUser" class="btn btn-secondary btn-block">
-            Zaloguj jako Użytkownik
-          </button>
-          <button type="button" @click="loginAsAdmin" class="btn btn-secondary btn-block">
-            Zaloguj jako Administrator
-          </button>
         </div>
       </form>
     </div>
