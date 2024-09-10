@@ -108,27 +108,16 @@ export default {
       showConfirmModal: false,
       confirmedIndex: null,
       daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      hours: Array.from({ length: 24 }, (v, k) => `${k}:00`) // Generowanie godzin od 0:00 do 23:00
+      hours: Array.from({ length: 24 }, (v, k) => `${k}:00`) // Generates hours from 0:00 to 23:00
     };
   },
-  methods: {
-    addEmployee() {
-      if (this.newEmployee.name && this.newEmployee.email && this.newEmployee.password) {
-        if (this.newEmployee.password === this.newEmployee.confirmPassword) {
-          this.employees.push({
-            name: this.newEmployee.name,
-            email: this.newEmployee.email,
-            workingHours: { ...this.newEmployee.workingHours }
-          });
-          this.resetForm();
-        } else {
-          alert('Hasła nie pasują do siebie!');
-        }
-      } else {
-        alert('Wszystkie pola są wymagane!');
-      }
-    },
-    resetForm() {
+methods: {
+  calculateEndTime(startTime, duration) {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const endHours = (hours + Number(duration)) % 24;  // Handle overflow of 24 hours
+    return `${endHours < 10 ? '0' : ''}${endHours}:${minutes < 10 ? '0' : ''}${minutes}`;
+  },
+      resetForm() {
       this.newEmployee.name = '';
       this.newEmployee.email = '';
       this.newEmployee.password = '';
@@ -143,22 +132,59 @@ export default {
         Sun: { start: '', duration: '8' }
       };
     },
-    confirmRemoveEmployee(index) {
-      this.showConfirmModal = true;
-      this.confirmedIndex = index;
-    },
-    removeEmployee(index) {
-      this.employees.splice(index, 1);
-      this.showConfirmModal = false;
-      this.confirmedIndex = null;
-    },
-    cancelRemoveEmployee() {
-      this.showConfirmModal = false;
-      this.confirmedIndex = null;
+  async addEmployee() {
+    if (this.newEmployee.name && this.newEmployee.email && this.newEmployee.password) {
+      if (this.newEmployee.password === this.newEmployee.confirmPassword) {
+        try {
+          const employeeData = {
+            first_name: this.newEmployee.name.split(' ')[0],
+            last_name: this.newEmployee.name.split(' ')[1] || '',
+            email: this.newEmployee.email,
+            password: this.newEmployee.password,
+            work_hours: this.getWorkHoursWithEndTimes()  // Now includes end times
+          };
+
+          const response = await fetch('http://127.0.0.1:8000/admin/add_user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+            },
+            body: JSON.stringify(employeeData)
+          });
+
+          if (!response.ok) {
+            throw new Error('Error adding employee');
+          }
+
+          const data = await response.json();
+          this.employees.push(data);
+          this.resetForm();
+          alert('Employee added successfully');
+        } catch (error) {
+          alert(`Error: ${error.message}`);
+        }
+      } else {
+        alert('Passwords do not match!');
+      }
+    } else {
+      alert('All fields are required!');
     }
+  },
+  getWorkHoursWithEndTimes() {
+    return Object.keys(this.newEmployee.workingHours).map(day => {
+      const workHour = this.newEmployee.workingHours[day];
+      return {
+        weekday: day,
+        start_time: workHour.start,
+        end_time: this.calculateEndTime(workHour.start, workHour.duration)
+      };
+    });
   }
+}
 };
 </script>
+
 
 <style scoped>
 .page-container {
