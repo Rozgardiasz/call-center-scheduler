@@ -6,6 +6,7 @@
       @cell-click="createEvent"
       @view-change="handleViewChange"
       :views="['day', 'week', 'month']"
+      :disable-views="['years', 'year', 'month']"
       default-view="week"
       :min-date="minDate"
       :max-date="maxDate"
