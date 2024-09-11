@@ -17,6 +17,7 @@
 <script>
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
+import jwtDecode from 'jwt-decode';  // Dodajemy funkcję do dekodowania tokenu JWT
 
 export default {
   name: 'CalendarComponent',
@@ -32,20 +33,8 @@ export default {
   },
   async created() {
     this.setCurrentMonth();
-    await this.fetchWorkHoursAndAddEvents();  
-    
-
-const startDate = '2024-09-10';
-let endDate = new Date('2024-09-12');
-
-
-endDate.setDate(endDate.getDate() + 1);
-
-
-const endDateStr = endDate.toISOString().split('T')[0];
-
-
-this.addVacations(startDate, endDateStr);
+    await this.fetchWorkHoursAndAddEvents();
+    await this.fetchUserVacationsAndAddEvents();  // Pobieranie wakacji i dodawanie do kalendarza
   },
   methods: {
     setCurrentMonth() {
@@ -146,43 +135,79 @@ this.addVacations(startDate, endDateStr);
         }
       }
     },
+    
+    async fetchUserVacationsAndAddEvents() {
+      try {
+        const token = sessionStorage.getItem('token');
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.user_id;
+
+        const response = await fetch(`http://127.0.0.1:8000/holidays/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user vacations');
+        }
+
+        const vacations = await response.json();
+        
+        vacations.forEach(vacation => {
+          const startDate = vacation.vacation_start;
+          let endDate = vacation.vacation_end;
+
+          endDate.setDate(endDate.getDate() + 1);
+
+
+          const endDateStr = endDate.toISOString().split('T')[0];
+
+
+          this.addVacations(startDate, endDateStr);
+        });
+      } catch (error) {
+        console.error('Error fetching user vacations:', error);
+      }
+    },
 
     addVacations(startDate, endDate) {
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  
-
- 
-  end.setDate(end.getDate() );
-  
-  end.setHours(0, 0, 0, 0);
+const start = new Date(startDate);
+const end = new Date(endDate);
 
 
-  this.events = this.events.filter(event => {
-    const eventStart = new Date(event.start);
-    const eventEnd = new Date(event.end);
+
+end.setDate(end.getDate() );
+
+end.setHours(0, 0, 0, 0);
 
 
-    return !(event.title === 'Godziny Pracy' && (
-      eventStart >= start && eventEnd <= end  
-    ));
-  });
+this.events = this.events.filter(event => {
+  const eventStart = new Date(event.start);
+  const eventEnd = new Date(event.end);
 
-  this.events.push({
-    start: startDate,
-    end: endDate,
-    title: 'Wakacje',
-    class: 'green-background',
-    allDay: true 
-  });
+
+  return !(event.title === 'Godziny Pracy' && (
+    eventStart >= start && eventEnd <= end  
+  ));
+});
+
+this.events.push({
+  start: startDate,
+  end: endDate,
+  title: 'Wakacje',
+  class: 'green-background',
+  allDay: true 
+});
 }
 
 
 
-  }
+}
 }
 </script>
+
 
 <style>
 .calendar-wrapper {

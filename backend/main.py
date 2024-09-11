@@ -106,7 +106,7 @@ def get_pending_holidays(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/holidays/{user_id}", response_model=List[schemas.Vacation])
 def get_user_holidays(user_id: int, request: Request, db: Session = Depends(get_db)):
-    get_current_active_admin(request, db)  # Ensure user is admin
+    # get_current_active_admin(request, db)  # Ensure user is admin
     user_holidays = crud.get_user_holidays(db, user_id)
     return user_holidays
 

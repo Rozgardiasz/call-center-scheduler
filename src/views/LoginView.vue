@@ -69,6 +69,9 @@ export default {
         const data = await response.json();
         alert(`Logged in as: ${data.first_name} ${data.last_name}`);
         
+        sessionStorage.setItem('first_name', data.first_name);
+        sessionStorage.setItem('last_name', data.last_name);
+
         // Using 'this' to call the correct methods
         sessionStorage.setItem('token', data.token); 
         if (data.is_admin) {

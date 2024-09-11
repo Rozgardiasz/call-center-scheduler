@@ -31,18 +31,30 @@
 
         <button type="submit" class="btn btn-primary btn-block">Złóż Wniosek</button>
       </form>
+
+      <!-- Wyświetlanie listy urlopów użytkownika -->
+      <h2>Twoje Urlopy</h2>
+      <ul v-if="holidays.length">
+        <li v-for="holiday in holidays" :key="holiday.id">
+          {{ holiday.vacation_start }} - {{ holiday.vacation_end }} ({{ holiday.type_of_vacation }}) - Status: {{ holiday.status }}
+        </li>
+      </ul>
+      <p v-else>Brak wniosków o urlop.</p>
     </div>
   </div>
 </template>
 
 <script>
+import {jwtDecode} from 'jwt-decode'; // Upewnij się, że masz zainstalowaną bibliotekę jwt-decode
+
 export default {
   name: 'LeaveApplication',
   data() {
     return {
       leaveType: '',
       startDate: '',
-      endDate: ''
+      endDate: '',
+      holidays: [] // Przechowywanie urlopów użytkownika
     };
   },
   methods: {
@@ -53,8 +65,12 @@ export default {
       }
 
       try {
+        const token = sessionStorage.getItem('token');
+        const decodedToken = jwtDecode(token);
+        const userId = decodedToken.user_id; // Zamiast decodedToken.id, teraz używamy decodedToken.user_id
+
         const requestData = {
-          employee_id: 2, //placeholder
+          employee_id: userId,
           vacation_start: this.startDate,
           vacation_end: this.endDate,
           type_of_vacation: this.leaveType
@@ -65,7 +81,7 @@ export default {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify(requestData)
         });
@@ -80,13 +96,46 @@ export default {
         this.leaveType = '';
         this.startDate = '';
         this.endDate = '';
+
+        this.fetchUserHolidays(); // Aktualizujemy listę urlopów po złożeniu wniosku
       } catch (error) {
         alert(`Błąd: ${error.message}`);
       }
+    },
+
+async fetchUserHolidays() {
+  try {
+    const token = sessionStorage.getItem('token');
+       const decodedToken = jwtDecode(token);
+        const userId = decodedToken.user_id;
+
+    const response = await fetch(`http://127.0.0.1:8000/holidays/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Nie udało się pobrać listy urlopów.');
     }
+
+    const data = await response.json();
+    this.holidays = data;
+  } catch (error) {
+    alert(`Błąd: ${error.message}`);
+  }
+}
+
+  },
+  mounted() {
+    this.fetchUserHolidays(); // Pobranie listy urlopów po załadowaniu komponentu
   }
 };
 </script>
+
+
 
 <style scoped>
 .auth-wrapper {
