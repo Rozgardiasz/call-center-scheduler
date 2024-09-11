@@ -3,6 +3,7 @@ from models import Employee, Vacation, WorkHour
 from hashlib import sha256
 import schemas
 from datetime import datetime
+from fastapi import HTTPException
 
 
 def authenticate_user(db: Session, credentials: schemas.EmployeeLogin):
@@ -134,3 +135,29 @@ def reject_vacation_request(db: Session, holiday_id: int):
     if vacation:
         vacation.status = 'rejected'
         db.commit()
+
+
+def get_user_by_id(db: Session, user_id: int):
+    return db.query(Employee).filter(Employee.id == user_id).first()
+
+def delete_user(db: Session, user_id: int):
+
+    user = get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Remove associated holiday requests
+    holidays = db.query(Vacation).filter(Vacation.employee_id == user_id).all()
+    for holiday in holidays:
+        db.delete(holiday)
+
+    # Remove associated work hours
+    work_hours = db.query(WorkHour).filter(WorkHour.employee_id == user_id).all()
+    for work_hour in work_hours:
+        db.delete(work_hour)
+
+    # Delete the user
+    db.delete(user)
+
+    # Commit the changes to the database
+    db.commit()

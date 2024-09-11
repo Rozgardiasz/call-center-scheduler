@@ -17,7 +17,8 @@ app = FastAPI()
 
 # List of allowed origins
 origins = [
-    "http://localhost:8080"
+    "http://localhost:8080",
+    "http://127.0.0.1:8080"  # Add any other origins if needed
 ]
 
 # Adding CORS middleware
@@ -124,6 +125,24 @@ def get_all_users(request: Request, db: Session = Depends(get_db)):
     all_users = crud.get_all_users(db)
     return all_users
 
+@app.delete("/admin/remove_user/{user_id}")
+def remove_user(user_id: int, request: Request, db: Session = Depends(get_db)):
+    # Ensure the user making the request is an admin
+    current_admin = get_current_active_admin(request, db)
+    if not current_admin:
+        raise HTTPException(status_code=403, detail="Only admins can remove users")
+
+    # Fetch the user from the database
+    user = crud.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.is_admin:
+        raise HTTPException(status_code=403, detail="Admins cannot be removed")
+
+    # Delete the user from the database
+    crud.delete_user(db, user_id)
+    return {"message": "User successfully removed"}
 
 
 @app.post("/can_approve_holiday")
