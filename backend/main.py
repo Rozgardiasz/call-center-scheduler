@@ -78,6 +78,9 @@ def request_holiday(holiday: schemas.VacationCreate, request: Request, db: Sessi
 def approve_holiday(holiday_id: int, request: Request, db: Session = Depends(get_db)):
     get_current_active_admin(request, db)  # Ensure user is admin
     vacation = crud.get_vacation_request(db, holiday_id)
+    if vacation.type_of_vacation == "on_demand":
+        crud.approve_vacation_request(db, holiday_id)
+
     if not crud.is_holiday_approval_possible(db, vacation.employee_id, vacation.vacation_start, vacation.vacation_end):
         raise HTTPException(status_code=400, detail="Not enough workers available")
     crud.approve_vacation_request(db, holiday_id)
