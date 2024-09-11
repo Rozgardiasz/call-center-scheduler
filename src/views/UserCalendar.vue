@@ -18,7 +18,7 @@
 <script>
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
-import jwtDecode from 'jwt-decode';  // Dodajemy funkcję do dekodowania tokenu JWT
+import {jwtDecode} from 'jwt-decode';  // Dodajemy funkcję do dekodowania tokenu JWT
 
 export default {
   name: 'CalendarComponent',
@@ -32,10 +32,22 @@ export default {
       maxDate: ''
     }
   },
+  vacation_data() {
+    return {
+
+      startDate: '',
+      endDate: '',
+      leaveType: '',
+      holidays: [] // Przechowywanie urlopów użytkownika
+    };
+  },
   async created() {
     this.setCurrentMonth();
     await this.fetchWorkHoursAndAddEvents();
+    
+
     await this.fetchUserVacationsAndAddEvents();  // Pobieranie wakacji i dodawanie do kalendarza
+
   },
   methods: {
     setCurrentMonth() {
@@ -56,6 +68,12 @@ export default {
       return `${year}-${month}-${day}`;
     },
     async fetchWorkHoursAndAddEvents() {
+
+
+
+
+
+      
       try {
         const token = sessionStorage.getItem('token');
         const response = await fetch('http://127.0.0.1:8000/working_hours', {
@@ -137,40 +155,51 @@ export default {
       }
     },
     
-    async fetchUserVacationsAndAddEvents() {
-      try {
-        const token = sessionStorage.getItem('token');
-        const decodedToken = jwtDecode(token);
-        const userId = decodedToken.user_id;
+async fetchUserVacationsAndAddEvents() {
+  try {
+    const token = sessionStorage.getItem('token');
+    const decodedToken = jwtDecode(token);
+    const userId = decodedToken.user_id;
 
-        const response = await fetch(`http://127.0.0.1:8000/holidays/${userId}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch user vacations');
-        }
-
-        const vacations = await response.json();
-        
-        vacations.forEach(vacation => {
-          const startDate = vacation.vacation_start;
-          let endDate = vacation.vacation_end;
-
-          endDate.setDate(endDate.getDate() + 1);
-
-
-          const endDateStr = endDate.toISOString().split('T')[0];
-
-
-          this.addVacations(startDate, endDateStr);
-        });
-      } catch (error) {
-        console.error('Error fetching user vacations:', error);
+    const response = await fetch(`http://127.0.0.1:8000/holidays/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
       }
-    },
+    });
+
+    if (!response.ok) {
+      throw new Error('Nie udało się pobrać listy urlopów.');
+    }
+
+    const vacation_data = await response.json();
+
+    this.holidays = vacation_data;
+
+    this.holidays.forEach(vacation => {
+
+      if(vacation.status == "approved"){
+        const startDate = new Date(vacation.vacation_start); 
+      let endDate = new Date(vacation.vacation_end); 
+
+  
+      endDate.setDate(endDate.getDate() + 1);
+      
+   
+      const endDateStr = endDate.toISOString().split('T')[0];
+
+    
+      this.addVacations(startDate, endDateStr);
+      }
+
+    });
+
+  } catch (error) {
+    alert(`Błąd: ${error.message}`);
+  }
+}
+,
 
     addVacations(startDate, endDate) {
 
@@ -202,8 +231,6 @@ this.events.push({
   allDay: true 
 });
 }
-
-
 
 }
 }
