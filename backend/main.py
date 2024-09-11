@@ -109,11 +109,26 @@ def view_working_hours(request: Request, db: Session = Depends(get_db)):
     return {"work_hours": working_hours}
 
 
-@app.get("/holidays/pending", response_model=List[schemas.Vacation])
+@app.get("/holidays/pending")
 def get_pending_holidays(request: Request, db: Session = Depends(get_db)):
     get_current_active_admin(request, db)  # Ensure user is admin
     pending_holidays = crud.get_pending_holidays(db)
-    return pending_holidays
+    
+    # Formatowanie zwróconych danych, uwzględniając pracownika
+    return [
+        {
+            "id": holiday.Vacation.id,
+            "employee_id": holiday.Employee.id,
+            "first_name": holiday.Employee.first_name,  # Zaciągnięte z powiązanego pracownika
+            "last_name": holiday.Employee.last_name,    # Zaciągnięte z powiązanego pracownika
+            "vacation_start": holiday.Vacation.vacation_start,
+            "vacation_end": holiday.Vacation.vacation_end,
+            "type_of_vacation": holiday.Vacation.type_of_vacation,
+            "status": holiday.Vacation.status
+        }
+        for holiday in pending_holidays
+    ]
+
 
 
 @app.get("/holidays/{user_id}", response_model=List[schemas.Vacation])

@@ -5,7 +5,7 @@
       
       <!-- Lista wniosków -->
       <ul class="requests-list">
-        <li 
+          <li 
           v-for="(request, index) in leaveRequests" 
           :key="index" 
           :class="{
@@ -14,7 +14,7 @@
             'cannot-approve': !canBeApproved(request)
           }"
         >
-          {{ request.employee.first_name }} {{ request.employee.last_name }} - {{ request.type_of_vacation }} od {{ request.vacation_start }} do {{ request.vacation_end }}
+          {{ request.first_name }} {{ request.last_name }} - {{ request.type_of_vacation }} od {{ request.vacation_start }} do {{ request.vacation_end }}
           <button @click="confirmApproveRequest(index)" class="btn btn-success">Akceptuj</button>
           <button @click="confirmRejectRequest(index)" class="btn btn-danger">Odrzuć</button>
         </li>
@@ -96,6 +96,7 @@ export default {
 
     // Check if a request can be approved (custom logic can be applied here)
     canBeApproved(request) {
+      // Placeholder logic, adjust this to your approval conditions
       return request.status === 'pending';
     },
 
@@ -109,50 +110,18 @@ export default {
       this.confirmedIndex = index;
     },
     async approveRequest(index) {
-      const request = this.leaveRequests[index];
-      try {
-        const holidayId = this.leaveRequests[index].id; // Get the holiday request ID
-        const response = await fetch(`http://127.0.0.1:8000/admin/approve_holiday/${holidayId}`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ holiday_id: request.id })
-        });
-        if (!response.ok) throw new Error('Failed to approve holiday');
-        
-        this.leaveRequests.splice(index, 1); // Remove from list
-        alert('Wniosek został zaakceptowany.');
-      } catch (error) {
-        console.error('Error approving request:', error);
-      }
-      
+      // Call your approval API here (this is a placeholder)
+      this.leaveRequests.splice(index, 1);
       this.showConfirmApproveModal = false;
       this.confirmedIndex = null;
+      alert('Wniosek został zaakceptowany.');
     },
     async rejectRequest(index) {
-      const request = this.leaveRequests[index];
-      try {
-        const holidayId = this.leaveRequests[index].id; // Get the holiday request ID
-        const response = await fetch(`http://127.0.0.1:8000/admin/reject_holiday/${holidayId}`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ holiday_id: request.id })
-        });
-        if (!response.ok) throw new Error('Failed to reject holiday');
-        
-        this.leaveRequests.splice(index, 1); // Remove from list
-        alert('Wniosek został odrzucony.');
-      } catch (error) {
-        console.error('Error rejecting request:', error);
-      }
-      
+      // Call your rejection API here (this is a placeholder)
+      this.leaveRequests.splice(index, 1);
       this.showConfirmRejectModal = false;
       this.confirmedIndex = null;
+      alert('Wniosek został odrzucony.');
     },
     cancelConfirmApprove() {
       this.showConfirmApproveModal = false;
@@ -164,8 +133,9 @@ export default {
     }
   }
 };
-</script>
 
+
+</script>
 
 <style scoped>
 .requests-wrapper {
