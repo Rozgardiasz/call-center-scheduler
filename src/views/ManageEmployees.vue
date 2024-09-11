@@ -1,4 +1,3 @@
-now make it so the list of employees is from backend using the endpoint
 <template>
   <div class="page-container">
     <!-- Panel dodawania przeciwnika po lewej, zajmuje 25% wysokości -->
@@ -240,14 +239,14 @@ export default {
 <style scoped>
 .page-container {
   display: flex;
-  margin-top: 250px;
-  height: 550%; /* Ustawienie pełnej wysokości ekranu */
+  margin-top: 250px; /* Adjust top margin as needed */
+  height: 100vh; /* Full height of the viewport */
   background-color: #f7f7f7;
 }
 
 .add-employee-panel {
   flex-basis: 30%;
-  height: 15%; /* Panel ma zajmować 25% wysokości */
+  flex-grow: 1;
   padding: 30px;
   background-color: #ffffff;
   display: flex;
@@ -255,13 +254,15 @@ export default {
   justify-content: space-between;
   align-items: center;
   border-right: 1px solid #ddd;
+  overflow-y: auto; /* Enable scrolling if content overflows */
 }
 
 .employee-list-panel {
   flex-basis: 70%;
+  flex-grow: 1;
   padding: 20px;
   background-color: #f1f1f1;
-  overflow-y: auto;
+  overflow-y: auto; /* Enable scrolling if content overflows */
 }
 
 .employee-list-panel h1 {
@@ -370,4 +371,5 @@ input, select {
 .confirm-modal-content .btn {
   margin: 5px;
 }
+
 </style>

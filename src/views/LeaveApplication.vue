@@ -1,17 +1,10 @@
 <template>
-  <div class="auth-wrapper">
-    <div class="auth-inner">
+  <div class="page-container">
+    <!-- Panel dodawania wniosków o urlop po lewej, zajmujący 30% szerokości -->
+    <div class="request-panel">
+      <h1>Wnioski o Urlop</h1>
+
       <form @submit.prevent="submitLeaveRequest">
-        <h1>Wnioski o Urlop</h1>
-
-        <div class="form-group">
-          <label for="leave-type">Typ Urlopu:</label>
-          <select v-model="leaveType" id="leave-type" class="form-control" required>
-            <option value="regular">Urlop</option>
-            <option value="on_demand">Urlop NŻ</option>
-          </select>
-        </div>
-
         <div class="form-group">
           <label for="start-date">Data rozpoczęcia:</label>
           <input type="date" v-model="startDate" id="start-date" class="form-control" required />
@@ -29,14 +22,31 @@
           />
         </div>
 
+        <div class="checkbox-group">
+          <input
+            type="checkbox"
+            v-model="isOnDemand"
+            id="on-demand-checkbox"
+          />
+          <label for="on-demand-checkbox">Urlop na Żądanie</label>
+        </div>
+
         <button type="submit" class="btn btn-primary btn-block">Złóż Wniosek</button>
       </form>
+    </div>
 
-      <!-- Wyświetlanie listy urlopów użytkownika -->
+    <!-- Panel wyświetlania wniosków o urlop po prawej, zajmujący 70% szerokości -->
+    <div class="holidays-panel">
       <h2>Twoje Urlopy</h2>
       <ul v-if="holidays.length">
-        <li v-for="holiday in holidays" :key="holiday.id">
-          {{ holiday.vacation_start }} - {{ holiday.vacation_end }} ({{ holiday.type_of_vacation }}) - Status: {{ holiday.status }}
+        <li
+          v-for="holiday in holidays"
+          :key="holiday.id"
+          :class="{'holiday-item': true, 'expired': isExpired(holiday.vacation_end)}"
+        >
+          {{ holiday.vacation_start }} - {{ holiday.vacation_end }}
+          <span v-if="holiday.type_of_vacation === 'on_demand'"> ({{ holiday.type_of_vacation }})</span>
+          <span :class="getStatusClass(holiday.status)">{{ holiday.status }}</span>
         </li>
       </ul>
       <p v-else>Brak wniosków o urlop.</p>
@@ -45,17 +55,23 @@
 </template>
 
 <script>
-import {jwtDecode} from 'jwt-decode'; // Upewnij się, że masz zainstalowaną bibliotekę jwt-decode
+import { jwtDecode } from 'jwt-decode';
 
 export default {
   name: 'LeaveApplication',
   data() {
     return {
-      leaveType: '',
+      leaveType: 'regular', // Domyślny typ urlopu
+      isOnDemand: false, // Stan checkboxa
       startDate: '',
       endDate: '',
       holidays: [] // Przechowywanie urlopów użytkownika
     };
+  },
+  watch: {
+    isOnDemand(newVal) {
+      this.leaveType = newVal ? 'on_demand' : 'regular';
+    }
   },
   methods: {
     async submitLeaveRequest() {
@@ -67,7 +83,7 @@ export default {
       try {
         const token = sessionStorage.getItem('token');
         const decodedToken = jwtDecode(token);
-        const userId = decodedToken.user_id; // Zamiast decodedToken.id, teraz używamy decodedToken.user_id
+        const userId = decodedToken.user_id;
 
         const requestData = {
           employee_id: userId,
@@ -92,8 +108,9 @@ export default {
         }
 
         alert('Wniosek o urlop został złożony pomyślnie.');
-        
-        this.leaveType = '';
+
+        this.leaveType = 'regular';
+        this.isOnDemand = false;
         this.startDate = '';
         this.endDate = '';
 
@@ -103,31 +120,47 @@ export default {
       }
     },
 
-async fetchUserHolidays() {
-  try {
-    const token = sessionStorage.getItem('token');
-       const decodedToken = jwtDecode(token);
+    async fetchUserHolidays() {
+      try {
+        const token = sessionStorage.getItem('token');
+        const decodedToken = jwtDecode(token);
         const userId = decodedToken.user_id;
 
-    const response = await fetch(`http://127.0.0.1:8000/holidays/${userId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
+        const response = await fetch(`http://127.0.0.1:8000/holidays/${userId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Nie udało się pobrać listy urlopów.');
+        }
+
+        const data = await response.json();
+        this.holidays = data;
+      } catch (error) {
+        alert(`Błąd: ${error.message}`);
       }
-    });
+    },
 
-    if (!response.ok) {
-      throw new Error('Nie udało się pobrać listy urlopów.');
+    getStatusClass(status) {
+      switch (status) {
+        case 'pending':
+          return 'status-pending';
+        case 'approved':
+          return 'status-approved';
+        case 'rejected':
+          return 'status-rejected';
+        default:
+          return '';
+      }
+    },
+
+    isExpired(endDate) {
+      return new Date(endDate) < new Date();
     }
-
-    const data = await response.json();
-    this.holidays = data;
-  } catch (error) {
-    alert(`Błąd: ${error.message}`);
-  }
-}
-
   },
   mounted() {
     this.fetchUserHolidays(); // Pobranie listy urlopów po załadowaniu komponentu
@@ -135,63 +168,72 @@ async fetchUserHolidays() {
 };
 </script>
 
-
-
 <style scoped>
-.auth-wrapper {
+.page-container {
   display: flex;
-  min-width: 500px;
-  align-items: center;
-  justify-content: center;
   height: 70vh;
   background-color: #f7f7f7;
   margin-top: 50px;
 }
 
-.auth-inner {
+.request-panel {
+  flex-basis: 30%;
+  padding: 20px; /* Zmniejszono padding dla zmniejszenia przerwy */
   background-color: #ffffff;
-  padding: 50px;
-  border-radius: 8px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-  width: 100%;
-  max-width: 500px;
-  text-align: center;
+  border-right: 1px solid #ddd;
+  display: flex;
+  max-height: 70%;
+  flex-direction: column;
+}
+
+.holidays-panel {
+  flex-basis: 70%;
+  padding: 20px;
+  background-color: #f1f1f1;
 }
 
 h1 {
-  margin-bottom: 30px;
-  text-align: center;
-  font-size: 2rem;
+  font-size: 1.8rem;
+  margin-bottom: 10px; /* Zmniejszono margines dolny dla mniejszych odstępów */
 }
 
-.form-group {
+h2 {
+  font-size: 1.5rem;
   margin-bottom: 20px;
 }
 
-input {
+.form-group {
+  margin-bottom: 15px; /* Zmniejszono margines dolny dla mniejszych odstępów */
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="date"] {
   width: 100%;
-  max-width: 300px;
-  font-size: 1.2rem;
   padding: 10px;
-  margin: 0 auto;
+  font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-input::placeholder {
-  color: #888;
-  font-size: 1.2rem;
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-top: 10px; /* Zmniejszono margines górny dla checkboxa */
 }
 
-.button-group {
-  margin-top: 20px;
+.checkbox-group input {
+  margin-right: 10px;
 }
 
 .btn-block {
   width: 100%;
-  padding: 15px;
-  font-size: 1.2rem;
-  margin-bottom: 10px;
+  padding: 12px;
+  font-size: 1.1rem;
 }
 
 .btn-primary {
@@ -204,13 +246,31 @@ input::placeholder {
   border-color: #004085;
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  border-color: #6c757d;
+.holiday-item {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.btn-secondary:hover {
-  background-color: #5a6268;
-  border-color: #545b62;
+.holiday-item.expired {
+  background-color: #f0f0f0; /* Light gray for expired items */
 }
+
+.status-pending {
+  color: #ffc107; /* Yellow */
+}
+
+.status-approved {
+  color: #28a745; /* Green */
+}
+
+.status-rejected {
+  color: #dc3545; /* Red */
+}
+
 </style>

@@ -128,7 +128,6 @@ p {
   margin-top: 110px; /* Dopasowanie marginesu górnego do wysokości obu sekcji navbaru */
   padding: 20px; /* Dodanie odstępu dla lepszej prezentacji treści */
   
- margin-left: auto;
-  margin-right: auto;
+
 }
 </style>
