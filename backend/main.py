@@ -73,13 +73,21 @@ def request_holiday(holiday: schemas.VacationCreate, request: Request, db: Sessi
     crud.create_vacation_request(db, holiday)
 
 
-@app.post("/admin/approve_holiday")
+@app.post("/admin/approve_holiday/{holiday_id}", status_code = 200)
 def approve_holiday(holiday_id: int, request: Request, db: Session = Depends(get_db)):
     get_current_active_admin(request, db)  # Ensure user is admin
     vacation = crud.get_vacation_request(db, holiday_id)
     if not crud.is_holiday_approval_possible(db, vacation.employee_id, vacation.vacation_start, vacation.vacation_end):
         raise HTTPException(status_code=400, detail="Not enough workers available")
     crud.approve_vacation_request(db, holiday_id)
+
+@app.post("/admin/reject_holiday/{holiday_id}",status_code = 200)
+def reject_holiday(holiday_id: int, request: Request, db: Session = Depends(get_db)):
+    get_current_active_admin(request, db)  # Ensure user is admin
+    vacation = crud.get_vacation_request(db, holiday_id)
+    if vacation.status != 'pending':
+        raise HTTPException(status_code=400, detail="Vacation request is not pending")
+    crud.reject_vacation_request(db, holiday_id)
 
 
 @app.get("/is_admin")

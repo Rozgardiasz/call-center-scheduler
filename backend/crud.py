@@ -74,15 +74,51 @@ def approve_vacation_request(db: Session, holiday_id: int):
     return None
 
 
-def is_holiday_approval_possible(db: Session, employee_id: int, vacation_start: datetime,
+from datetime import datetime, time
+
+def is_holiday_approval_possible(db: Session, employee_id: int, vacation_start: datetime, 
                                  vacation_end: datetime) -> bool:
-    MIN_WORKERS_REQUIRED = 3
+    # Define minimum workers for different conditions
+    MIN_WORKERS_DEFAULT = 1
+    MIN_WORKERS_WEEKEND = 0
+    MIN_WORKERS_HOLIDAY = 0
+    MIN_WORKERS_BUSINESS_HOURS = 2
+    
+    # Define business hours
+    business_start = time(8, 0)  # 08:00 AM
+    business_end = time(16, 0)   # 04:00 PM
+
+    # List of predefined holidays
+    holidays = [
+        datetime(2024, 12, 25),  # Example: Christmas
+        datetime(2024, 1, 1),    # Example: New Year's Day
+        # Add more holidays as needed
+    ]
+
+    # Check if the start or end date falls on a holiday
+    if any(vacation_start == holiday or vacation_end == holiday for holiday in holidays):
+        min_workers_required = MIN_WORKERS_HOLIDAY
+    else:
+        # Check if it's Saturday or Sunday
+        if vacation_start.weekday() in (5, 6) or vacation_end.weekday() in (5, 6):  # 5 = Saturday, 6 = Sunday
+            min_workers_required = MIN_WORKERS_WEEKEND
+        else:
+            # Check if the vacation is within business hours (8:00 AM - 4:00 PM)
+            if business_start <= vacation_start.time() <= business_end and business_start <= vacation_end.time() <= business_end:
+                min_workers_required = MIN_WORKERS_BUSINESS_HOURS
+            else:
+                min_workers_required = MIN_WORKERS_DEFAULT
+
+    # Query overlapping work hours to check the number of available workers
     overlapping_work_hours = db.query(WorkHour).filter(
         WorkHour.employee_id != employee_id,
         WorkHour.weekday.in_([vacation_start.strftime('%A'), vacation_end.strftime('%A')])
     ).all()
+
     available_workers = len(overlapping_work_hours)
-    return available_workers >= MIN_WORKERS_REQUIRED
+    print(f"{available_workers=}\n{min_workers_required=}")
+
+    return available_workers >= min_workers_required
 
 
 def can_request_more_holidays(db: Session, employee_id: int) -> bool:
@@ -92,3 +128,9 @@ def can_request_more_holidays(db: Session, employee_id: int) -> bool:
         Vacation.status == 'approved'
     ).count()
     return approved_holidays_count < HOLIDAY_LIMIT
+
+def reject_vacation_request(db: Session, holiday_id: int):
+    vacation = db.query(Vacation).filter(Vacation.id == holiday_id).first()
+    if vacation:
+        vacation.status = 'rejected'
+        db.commit()
