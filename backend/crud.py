@@ -105,7 +105,7 @@ def is_holiday_approval_possible(db: Session, employee_id: int, vacation_start: 
             min_workers_required = MIN_WORKERS_WEEKEND
         else:
             # Check if the vacation is within business hours (8:00 AM - 4:00 PM)
-            if business_start <= vacation_start.time() <= business_end and business_start <= vacation_end.time() <= business_end:
+            if business_start <= vacation_start <= business_end and business_start <= vacation_end <= business_end:
                 min_workers_required = MIN_WORKERS_BUSINESS_HOURS
             else:
                 min_workers_required = MIN_WORKERS_DEFAULT
