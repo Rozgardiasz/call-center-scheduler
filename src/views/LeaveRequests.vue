@@ -110,18 +110,50 @@ export default {
       this.confirmedIndex = index;
     },
     async approveRequest(index) {
-      // Call your approval API here (this is a placeholder)
-      this.leaveRequests.splice(index, 1);
+      const request = this.leaveRequests[index];
+      try {
+        const holidayId = this.leaveRequests[index].id; // Get the holiday request ID
+        const response = await fetch(`http://127.0.0.1:8000/admin/approve_holiday/${holidayId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ holiday_id: request.id })
+        });
+        if (!response.ok) throw new Error('Failed to approve holiday');
+        
+        this.leaveRequests.splice(index, 1); // Remove from list
+        alert('Wniosek został zaakceptowany.');
+      } catch (error) {
+        console.error('Error approving request:', error);
+      }
+      
       this.showConfirmApproveModal = false;
       this.confirmedIndex = null;
-      alert('Wniosek został zaakceptowany.');
     },
     async rejectRequest(index) {
-      // Call your rejection API here (this is a placeholder)
-      this.leaveRequests.splice(index, 1);
+      const request = this.leaveRequests[index];
+      try {
+        const holidayId = this.leaveRequests[index].id; // Get the holiday request ID
+        const response = await fetch(`http://127.0.0.1:8000/admin/reject_holiday/${holidayId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ holiday_id: request.id })
+        });
+        if (!response.ok) throw new Error('Failed to reject holiday');
+        
+        this.leaveRequests.splice(index, 1); // Remove from list
+        alert('Wniosek został odrzucony.');
+      } catch (error) {
+        console.error('Error rejecting request:', error);
+      }
+      
       this.showConfirmRejectModal = false;
       this.confirmedIndex = null;
-      alert('Wniosek został odrzucony.');
     },
     cancelConfirmApprove() {
       this.showConfirmApproveModal = false;
