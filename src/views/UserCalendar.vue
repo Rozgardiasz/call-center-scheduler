@@ -93,29 +93,35 @@ export default {
       }
     },
     addWorkHoursForWeeks(workHours) {
-      const currentDate = new Date();
-      const currentDay = currentDate.getDay(); 
+  const currentDate = new Date();
+  const currentDay = currentDate.getDay();
+  
+  // Calculate the number of weeks remaining in the year
+  const endOfYear = new Date(currentDate.getFullYear(), 11, 31); // December 31st of the current year
+  const diffTime = Math.abs(endOfYear - currentDate);
+  const remainingWeeks = Math.ceil(diffTime / (7 * 24 * 60 * 60 * 1000)); // Total remaining weeks until the end of the year
 
-      for (let weekOffset = 0; weekOffset <= 3; weekOffset++) {
-        workHours.forEach(workHour => {
-          const weekday = this.getWeekdayNumber(workHour.weekday);  
-          const diffDays = weekday - currentDay + (weekOffset * 7);  
+  for (let weekOffset = 0; weekOffset <= remainingWeeks; weekOffset++) {
+    workHours.forEach(workHour => {
+      const weekday = this.getWeekdayNumber(workHour.weekday);
+      const diffDays = weekday - currentDay + (weekOffset * 7);
+      
+      const workDayDate = new Date(currentDate);
+      workDayDate.setDate(currentDate.getDate() + diffDays);
 
-          const workDayDate = new Date(currentDate);
-          workDayDate.setDate(currentDate.getDate() + diffDays);
+      const startTime = this.createDateWithTime(workDayDate, workHour.start_time);
+      const endTime = this.createDateWithTime(workDayDate, workHour.end_time);
 
-          const startTime = this.createDateWithTime(workDayDate, workHour.start_time);
-          const endTime = this.createDateWithTime(workDayDate, workHour.end_time);
-
-          this.events.push({
-            start: startTime,
-            end: endTime,
-            title: 'Godziny Pracy',
-            class: 'orange-background'
-          });
-        });
-      }
-    },
+      this.events.push({
+        start: startTime,
+        end: endTime,
+        title: 'Godziny Pracy',
+        class: 'orange-background'
+      });
+    });
+  }
+}
+,
     getWeekdayNumber(weekday) {
       const days = {
         Mon: 1,

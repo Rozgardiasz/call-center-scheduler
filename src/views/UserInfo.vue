@@ -3,7 +3,7 @@
     <div>
       <h1>Welcome, {{ employeeName }}!</h1>
       <p>You have <b>{{totalLeaveDays }}</b>  <i>(including <b>{{totalOnDemandLeaveDays }}</b> on demand days)</i> vacation days left for <b>{{ currentYear }}</b>.</p>
-      <p>You've already taken <b>{{ totalLeaveDays }}</b> vacation days this year!</p>
+      <p>You've already taken <b>{{ LeaveDaysTaken }}</b> vacation days this year!</p>
       <!-- Conditionally display the paragraph only if nextVacationDate is not empty -->
       <p v-if="nextVacationDate">Your next vacation starts on: {{ nextVacationDate }}</p>
     </div>
@@ -26,6 +26,7 @@ export default {
       currentYear: new Date().getFullYear(),
       totalLeaveDays: 0,
       totalOnDemandLeaveDays: 0,
+      LeaveDaysTaken: 0,
     };
   },
   created() {
@@ -142,8 +143,16 @@ export default {
         }
       });
 
+      this.LeaveDaysTaken = totalDays
+
       totalDays = 20 - totalDays;
       totalDemandDays = 4 - totalDemandDays;
+      if(totalDays < 0){
+        totalDays =0
+      }
+      if(totalDemandDays < 0){
+        totalDemandDays =0
+      }
 
       if (totalDemandDays > totalDays) {
         totalDemandDays = totalDays;

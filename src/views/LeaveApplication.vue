@@ -1,13 +1,19 @@
 <template>
   <div class="page-container">
-    <!-- Panel dodawania wniosków o urlop po lewej, zajmujący 30% szerokości -->
     <div class="request-panel">
       <h1>Wnioski o Urlop</h1>
 
       <form @submit.prevent="submitLeaveRequest">
         <div class="form-group">
           <label for="start-date">Data rozpoczęcia:</label>
-          <input type="date" v-model="startDate" id="start-date" class="form-control" required />
+          <input
+            type="date"
+            v-model="startDate"
+            id="start-date"
+            class="form-control"
+            required
+            :min="todayDate"
+          />
         </div>
 
         <div class="form-group">
@@ -18,7 +24,7 @@
             id="end-date"
             class="form-control"
             required
-            :min="startDate"
+            :min="minEndDate"
           />
         </div>
 
@@ -35,7 +41,6 @@
       </form>
     </div>
 
-    <!-- Panel wyświetlania wniosków o urlop po prawej, zajmujący 70% szerokości -->
     <div class="holidays-panel">
       <h2>Twoje Urlopy</h2>
       <ul v-if="holidays.length">
@@ -54,6 +59,7 @@
   </div>
 </template>
 
+
 <script>
 import { jwtDecode } from 'jwt-decode';
 
@@ -61,12 +67,24 @@ export default {
   name: 'LeaveApplication',
   data() {
     return {
-      leaveType: 'regular', // Domyślny typ urlopu
-      isOnDemand: false, // Stan checkboxa
+      leaveType: 'regular', 
+      isOnDemand: false,
       startDate: '',
       endDate: '',
-      holidays: [] // Przechowywanie urlopów użytkownika
+      holidays: [] 
     };
+  },
+  computed: {
+    todayDate() {
+      return new Date().toISOString().split('T')[0];
+    },
+    minEndDate() {
+
+      if (this.startDate) {
+        return this.startDate > this.todayDate ? this.startDate : this.todayDate;
+      }
+      return this.todayDate;
+    }
   },
   watch: {
     isOnDemand(newVal) {
@@ -114,7 +132,7 @@ export default {
         this.startDate = '';
         this.endDate = '';
 
-        this.fetchUserHolidays(); // Aktualizujemy listę urlopów po złożeniu wniosku
+        this.fetchUserHolidays(); 
       } catch (error) {
         alert(`Błąd: ${error.message}`);
       }
@@ -163,10 +181,12 @@ export default {
     }
   },
   mounted() {
-    this.fetchUserHolidays(); // Pobranie listy urlopów po załadowaniu komponentu
+    this.fetchUserHolidays(); 
   }
 };
 </script>
+
+
 
 <style scoped>
 .page-container {
@@ -178,7 +198,7 @@ export default {
 
 .request-panel {
   flex-basis: 30%;
-  padding: 20px; /* Zmniejszono padding dla zmniejszenia przerwy */
+  padding: 20px;
   background-color: #ffffff;
   border-right: 1px solid #ddd;
   display: flex;
@@ -194,7 +214,7 @@ export default {
 
 h1 {
   font-size: 1.8rem;
-  margin-bottom: 10px; /* Zmniejszono margines dolny dla mniejszych odstępów */
+  margin-bottom: 10px; 
 }
 
 h2 {
@@ -203,7 +223,7 @@ h2 {
 }
 
 .form-group {
-  margin-bottom: 15px; /* Zmniejszono margines dolny dla mniejszych odstępów */
+  margin-bottom: 15px; 
 }
 
 .form-group label {
@@ -223,7 +243,7 @@ input[type="date"] {
 .checkbox-group {
   display: flex;
   align-items: center;
-  margin-top: 10px; /* Zmniejszono margines górny dla checkboxa */
+  margin-top: 10px; 
 }
 
 .checkbox-group input {
@@ -258,19 +278,18 @@ input[type="date"] {
 }
 
 .holiday-item.expired {
-  background-color: #f0f0f0; /* Light gray for expired items */
+  background-color: #f0f0f0; 
 }
 
 .status-pending {
-  color: #ffc107; /* Yellow */
+  color: #ffc107; 
 }
-
 .status-approved {
-  color: #28a745; /* Green */
+  color: #28a745; 
 }
 
 .status-rejected {
-  color: #dc3545; /* Red */
+  color: #dc3545; 
 }
 
 </style>
