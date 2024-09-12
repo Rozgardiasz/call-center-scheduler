@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import FastAPI, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from typing import List
-from models import WorkHour
+from models import WorkHour, Vacation
 import schemas
 import crud
 from auth import get_current_active_admin, get_current_user, create_jwt_token
@@ -69,9 +69,22 @@ def add_user(user: schemas.EmployeeCreate, request: Request, db: Session = Depen
 @app.post("/holiday_request")
 def request_holiday(holiday: schemas.VacationCreate, request: Request, db: Session = Depends(get_db)):
     get_current_user(request, db)  # Ensure user is authenticated
-    if not crud.can_request_more_holidays(db, holiday.employee_id):
-        raise HTTPException(status_code=400, detail="Holiday limit reached")
-    crud.create_vacation_request(db, holiday)
+    new_holiday = Vacation(
+        employee_id=holiday.employee_id,
+        vacation_start=holiday.vacation_start,
+        vacation_end=holiday.vacation_end,
+        type_of_vacation=holiday.type_of_vacation,
+        status='pending'
+    )
+    
+    if not crud.can_request_more_holidays(db, holiday.employee_id, new_holiday):
+        if new_holiday.type_of_vacation == "on_demand":
+            raise HTTPException(status_code=400, detail="On-demand leave limit reached")
+        else:
+            raise HTTPException(status_code=400, detail="Leave limit reached")
+    
+    crud.create_vacation_request(db, new_holiday)
+    return {"message": "Holiday request submitted successfully"}
 
 
 @app.post("/admin/approve_holiday/{holiday_id}", status_code = 200)

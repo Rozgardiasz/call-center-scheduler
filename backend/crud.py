@@ -159,13 +159,71 @@ def is_holiday_approval_possible(db: Session, employee_id: int, vacation_start: 
     return True
 
 
-def can_request_more_holidays(db: Session, employee_id: int) -> bool:
-    HOLIDAY_LIMIT = 20
-    approved_holidays_count = db.query(Vacation).filter(
+from sqlalchemy.orm import Session
+from datetime import date, timedelta
+from models import Vacation
+
+def can_request_more_holidays(db: Session, employee_id: int, new_holiday: Vacation) -> bool:
+    # Define limits
+    TOTAL_LEAVE_DAYS = 20
+    TOTAL_ON_DEMAND_LEAVE_DAYS = 4
+    
+    year = new_holiday.vacation_start.year
+    
+    # Query approved holidays for the employee
+    holidays = db.query(Vacation).filter(
         Vacation.employee_id == employee_id,
         Vacation.status == 'approved'
-    ).count()
-    return approved_holidays_count < HOLIDAY_LIMIT
+    ).all()
+    
+    working_hours = {
+        "Mon": True,
+        "Tue": True,
+        "Wed": True,
+        "Thu": True,
+        "Fri": True,
+        "Sat": False,
+        "Sun": False
+    }
+    
+    total_days_taken = 0
+    total_demand_days_taken = 0
+
+    # Include the new holiday request in the calculations
+    all_holidays = holidays + [new_holiday]
+
+    for holiday in all_holidays:
+        start_date = holiday.vacation_start
+        end_date = holiday.vacation_end
+
+        if start_date.year <= year <= end_date.year:
+            start_of_year = date(year, 1, 1)
+            end_of_year = date(year, 12, 31)
+            actual_start = max(start_date, start_of_year)
+            actual_end = min(end_date, end_of_year)
+
+            current_date = actual_start
+            while current_date <= actual_end:
+                day_of_week = current_date.strftime('%a')
+                if working_hours.get(day_of_week, False):
+                    total_days_taken += 1
+                    if holiday.type_of_vacation == "on_demand":
+                        total_demand_days_taken += 1
+                current_date += timedelta(days=1)
+
+    remaining_leave_days = TOTAL_LEAVE_DAYS - total_days_taken
+    remaining_demand_days = TOTAL_ON_DEMAND_LEAVE_DAYS - total_demand_days_taken
+
+    if remaining_leave_days < 0:
+        remaining_leave_days = 0
+    if remaining_demand_days < 0:
+        remaining_demand_days = 0
+
+    if new_holiday.type_of_vacation == "on_demand":
+        return remaining_demand_days > 0
+    else:
+        return remaining_leave_days > 0
+
 
 def reject_vacation_request(db: Session, holiday_id: int):
     vacation = db.query(Vacation).filter(Vacation.id == holiday_id).first()
