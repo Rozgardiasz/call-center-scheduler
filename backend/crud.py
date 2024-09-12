@@ -203,7 +203,7 @@ def can_request_more_holidays(db: Session, employee_id: int, new_holiday: Vacati
             current_date = actual_start
             while current_date <= actual_end:
                 day_of_week = current_date.strftime('%a')
-                if working_hours.get(day_of_week, False):
+                if working_days.get(day_of_week, False):
                     total_days_taken += 1
                     if holiday.type_of_vacation == "on_demand":
                         total_demand_days_taken += 1
