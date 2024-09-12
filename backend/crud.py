@@ -183,6 +183,9 @@ def can_request_more_holidays(db: Session, employee_id: int, new_holiday: Vacati
 
     # Create a dictionary of working days based on the WorkHour table
     working_days = {work_hour.weekday: True for work_hour in employee_work_hours}
+
+    working_days["Sun"] = False
+    working_days["Sat"] = False
     
     total_days_taken = 0
     total_demand_days_taken = 0
