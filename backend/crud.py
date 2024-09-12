@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from models import Employee, Vacation, WorkHour
 from hashlib import sha256
 import schemas
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import HTTPException
 
 
@@ -77,38 +77,54 @@ def approve_vacation_request(db: Session, holiday_id: int):
 
 from datetime import datetime, time
 
-def is_holiday_approval_possible(db: Session, employee_id: int, vacation_start: datetime, 
-                                 vacation_end: datetime) -> bool:
+from datetime import datetime, time
+from sqlalchemy.orm import Session
+from models import WorkHour  # Adjust import based on your project structure
+
+from datetime import datetime, time
+from sqlalchemy.orm import Session
+
+def is_holiday_approval_possible(db: Session, employee_id: int, vacation_start: datetime, vacation_end: datetime) -> bool:
     # Define minimum workers for different conditions
     MIN_WORKERS_DEFAULT = 1
     MIN_WORKERS_WEEKEND = 0
     MIN_WORKERS_HOLIDAY = 0
     MIN_WORKERS_BUSINESS_HOURS = 2
     
-    # Define business hours
+    # Define business hours (not used directly here but can be useful for other checks)
     business_start = time(8, 0)  # 08:00 AM
     business_end = time(16, 0)   # 04:00 PM
 
-    # List of predefined holidays
+    # List of predefined holidays (only dates, no times)
     holidays = [
-        datetime(2024, 12, 25),  # Example: Christmas
-        datetime(2024, 1, 1),    # Example: New Year's Day
+        datetime(2024, 12, 25).date(),  # Example: Christmas
+        datetime(2024, 1, 1).date(),    # Example: New Year's Day
         # Add more holidays as needed
     ]
 
-    # Check if the start or end date falls on a holiday
-    if any(vacation_start == holiday or vacation_end == holiday for holiday in holidays):
+    # Convert vacation_start and vacation_end to date objects
+    vacation_start_date = vacation_start
+    vacation_end_date = vacation_end
+
+    # Check if any date in the vacation period falls on a holiday
+    is_holiday = any(
+        vacation_start_date <= holiday <= vacation_end_date
+        for holiday in holidays
+    )
+    
+    if is_holiday:
         min_workers_required = MIN_WORKERS_HOLIDAY
     else:
-        # Check if it's Saturday or Sunday
-        if vacation_start.weekday() in (5, 6) or vacation_end.weekday() in (5, 6):  # 5 = Saturday, 6 = Sunday
+        # Check if any date in the vacation period falls on a weekend
+        is_weekend = any(
+            (vacation_start_date + timedelta(days=i)).weekday() in (5, 6)
+            for i in range((vacation_end_date - vacation_start_date).days + 1)
+        )
+        if is_weekend:
             min_workers_required = MIN_WORKERS_WEEKEND
         else:
-            # Check if the vacation is within business hours (8:00 AM - 4:00 PM)
-            if business_start <= vacation_start <= business_end and business_start <= vacation_end <= business_end:
-                min_workers_required = MIN_WORKERS_BUSINESS_HOURS
-            else:
-                min_workers_required = MIN_WORKERS_DEFAULT
+            # For business hours, we assume the whole day is checked
+            min_workers_required = MIN_WORKERS_BUSINESS_HOURS
 
     # Query overlapping work hours to check the number of available workers
     overlapping_work_hours = db.query(WorkHour).filter(
