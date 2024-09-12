@@ -69,13 +69,18 @@ def add_user(user: schemas.EmployeeCreate, request: Request, db: Session = Depen
 @app.post("/holiday_request")
 def request_holiday(holiday: schemas.VacationCreate, request: Request, db: Session = Depends(get_db)):
     get_current_user(request, db)  # Ensure user is authenticated
+
+    vacation_start_date = datetime.strptime(holiday.vacation_start, '%Y-%m-%d').date()
+    vacation_end_date = datetime.strptime(holiday.vacation_end, '%Y-%m-%d').date()
+
     new_holiday = Vacation(
         employee_id=holiday.employee_id,
-        vacation_start=holiday.vacation_start,
-        vacation_end=holiday.vacation_end,
+        vacation_start=vacation_start_date,
+        vacation_end=vacation_end_date,
         type_of_vacation=holiday.type_of_vacation,
         status='pending'
     )
+
     
     if not crud.can_request_more_holidays(db, holiday.employee_id, new_holiday):
         if new_holiday.type_of_vacation == "on_demand":
