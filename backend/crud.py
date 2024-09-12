@@ -176,15 +176,13 @@ def can_request_more_holidays(db: Session, employee_id: int, new_holiday: Vacati
         Vacation.status == 'approved'
     ).all()
     
-    working_hours = {
-        "Mon": True,
-        "Tue": True,
-        "Wed": True,
-        "Thu": True,
-        "Fri": True,
-        "Sat": False,
-        "Sun": False
-    }
+    # Fetch working hours for the employee
+    employee_work_hours = db.query(WorkHour).filter(
+        WorkHour.employee_id == employee_id
+    ).all()
+
+    # Create a dictionary of working days based on the WorkHour table
+    working_days = {work_hour.weekday: True for work_hour in employee_work_hours}
     
     total_days_taken = 0
     total_demand_days_taken = 0
