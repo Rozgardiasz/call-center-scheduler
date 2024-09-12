@@ -4,6 +4,7 @@ from hashlib import sha256
 import schemas
 from datetime import datetime, timedelta
 from fastapi import HTTPException
+from sqlalchemy import or_, and_
 
 
 def authenticate_user(db: Session, credentials: schemas.EmployeeLogin):
@@ -126,16 +127,36 @@ def is_holiday_approval_possible(db: Session, employee_id: int, vacation_start: 
             # For business hours, we assume the whole day is checked
             min_workers_required = MIN_WORKERS_BUSINESS_HOURS
 
-    # Query overlapping work hours to check the number of available workers
-    overlapping_work_hours = db.query(WorkHour).filter(
-        WorkHour.employee_id != employee_id,
-        WorkHour.weekday.in_([vacation_start.strftime('%A'), vacation_end.strftime('%A')])
+    # Get the employee's work hours during the vacation period
+    employee_work_hours = db.query(WorkHour).filter(
+        WorkHour.employee_id == employee_id,
+        WorkHour.weekday.in_([vacation_start.strftime('%a'), vacation_end.strftime('%a')])
     ).all()
 
-    available_workers = len(overlapping_work_hours)
-    print(f"{available_workers=}\n{min_workers_required=}")
+    if not employee_work_hours:
+        # No specific work hours found for the employee, assume default conditions
+        print(f"{employee_work_hours=}")
+        return False
 
-    return available_workers >= min_workers_required
+    # Check for overlapping work hours with other employees during the requested vacation period
+    for work_hour in employee_work_hours:
+        overlapping_work_hours = db.query(WorkHour).filter(
+            WorkHour.employee_id != employee_id,  # Other employees only
+            WorkHour.weekday == work_hour.weekday,  # Same weekday as the employee's work hour
+            or_(
+                and_(WorkHour.start_time <= work_hour.start_time, WorkHour.end_time >= work_hour.start_time),  # Overlap with employee's start
+                and_(WorkHour.start_time <= work_hour.end_time, WorkHour.end_time >= work_hour.end_time)  # Overlap with employee's end
+            )
+        ).all()
+
+        available_workers = len(overlapping_work_hours)
+        print(f"{available_workers=}\n{min_workers_required=}")
+
+        # If not enough workers are available during any of the employee's work hours, return False
+        if available_workers < min_workers_required:
+            return False
+
+    return True
 
 
 def can_request_more_holidays(db: Session, employee_id: int) -> bool:
