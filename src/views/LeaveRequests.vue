@@ -121,7 +121,11 @@ export default {
           },
           body: JSON.stringify({ holiday_id: request.id })
         });
-        if (!response.ok) throw new Error('Failed to approve holiday');
+        if (!response.ok) {
+            alert('Can`t approve request due to violation of regulations');
+            throw new Error('Can`t approve holiday');
+        }
+
         
         this.leaveRequests.splice(index, 1); 
         alert('Request approved');
