@@ -18,7 +18,7 @@
 <script>
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
-import {jwtDecode} from 'jwt-decode';  // Dodajemy funkcję do dekodowania tokenu JWT
+import {jwtDecode} from 'jwt-decode'; 
 
 export default {
   name: 'CalendarComponent',
@@ -38,7 +38,7 @@ export default {
       startDate: '',
       endDate: '',
       leaveType: '',
-      holidays: [] // Przechowywanie urlopów użytkownika
+      holidays: [] 
     };
   },
   async created() {
@@ -46,7 +46,7 @@ export default {
     await this.fetchWorkHoursAndAddEvents();
     
 
-    await this.fetchUserVacationsAndAddEvents();  // Pobieranie wakacji i dodawanie do kalendarza
+    await this.fetchUserVacationsAndAddEvents();  
 
   },
   methods: {
@@ -96,10 +96,9 @@ export default {
   const currentDate = new Date();
   const currentDay = currentDate.getDay();
   
-  // Calculate the number of weeks remaining in the year
-  const endOfYear = new Date(currentDate.getFullYear(), 11, 31); // December 31st of the current year
+  const endOfYear = new Date(currentDate.getFullYear(), 11, 31);
   const diffTime = Math.abs(endOfYear - currentDate);
-  const remainingWeeks = Math.ceil(diffTime / (7 * 24 * 60 * 60 * 1000)); // Total remaining weeks until the end of the year
+  const remainingWeeks = Math.ceil(diffTime / (7 * 24 * 60 * 60 * 1000));
 
   for (let weekOffset = 0; weekOffset <= remainingWeeks; weekOffset++) {
     workHours.forEach(workHour => {
@@ -115,7 +114,7 @@ export default {
       this.events.push({
         start: startTime,
         end: endTime,
-        title: 'Godziny Pracy',
+        title: 'Working hours',
         class: 'orange-background'
       });
     });
@@ -176,7 +175,7 @@ async fetchUserVacationsAndAddEvents() {
     });
 
     if (!response.ok) {
-      throw new Error('Nie udało się pobrać listy urlopów.');
+      throw new Error('Failed to retrieve the list of leaves');
     }
 
     const vacation_data = await response.json();
@@ -224,7 +223,7 @@ this.events = this.events.filter(event => {
   const eventEnd = new Date(event.end);
 
 
-  return !(event.title === 'Godziny Pracy' && (
+  return !(event.title === 'Working hours' && (
     eventStart >= start && eventEnd <= end  
   ));
 });
@@ -232,7 +231,7 @@ this.events = this.events.filter(event => {
 this.events.push({
   start: startDate,
   end: endDate,
-  title: 'Wakacje',
+  title: 'Vacation',
   class: 'green-background',
   allDay: true 
 });

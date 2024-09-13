@@ -1,17 +1,16 @@
 <template>
   <div class="page-container">
-    <!-- Panel dodawania wniosków o urlop po lewej, zajmujący 30% szerokości -->
     <div class="request-panel">
       <h1>Wnioski o Urlop</h1>
 
       <form @submit.prevent="submitLeaveRequest">
         <div class="form-group">
-          <label for="start-date">Data rozpoczęcia:</label>
+          <label for="start-date">Start Date:</label>
           <input type="date" v-model="startDate" id="start-date" class="form-control" required />
         </div>
 
         <div class="form-group">
-          <label for="end-date">Data zakończenia:</label>
+          <label for="end-date">End Date:</label>
           <input
             type="date"
             v-model="endDate"
@@ -28,16 +27,15 @@
             v-model="isOnDemand"
             id="on-demand-checkbox"
           />
-          <label for="on-demand-checkbox">Urlop na Żądanie</label>
+          <label for="on-demand-checkbox">Leave on Demand</label>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Złóż Wniosek</button>
+        <button type="submit" class="btn btn-primary btn-block">Submit Request</button>
       </form>
     </div>
 
-    <!-- Panel wyświetlania wniosków o urlop po prawej, zajmujący 70% szerokości -->
     <div class="holidays-panel">
-      <h2>Twoje Urlopy</h2>
+      <h2>Your Vacations</h2>
       <ul v-if="holidays.length">
         <li
           v-for="holiday in holidays"
@@ -49,7 +47,7 @@
           <span :class="getStatusClass(holiday.status)">{{ holiday.status }}</span>
         </li>
       </ul>
-      <p v-else>Brak wniosków o urlop.</p>
+      <p v-else>No leave requests</p>
     </div>
   </div>
 </template>
@@ -61,11 +59,11 @@ export default {
   name: 'LeaveApplication',
   data() {
     return {
-      leaveType: 'regular', // Domyślny typ urlopu
-      isOnDemand: false, // Stan checkboxa
+      leaveType: 'regular',
+      isOnDemand: false,
       startDate: '',
       endDate: '',
-      holidays: [] // Przechowywanie urlopów użytkownika
+      holidays: []
     };
   },
   watch: {
@@ -76,7 +74,7 @@ export default {
   methods: {
     async submitLeaveRequest() {
       if (this.startDate && this.endDate && new Date(this.endDate) < new Date(this.startDate)) {
-        alert('Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.');
+        alert('The end date cannot be earlier than the start date');
         return;
       }
 
@@ -104,19 +102,19 @@ export default {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.detail || 'Wystąpił błąd podczas składania wniosku o urlop.');
+          throw new Error(errorData.detail || 'An error occurred while submitting the leave request');
         }
 
-        alert('Wniosek o urlop został złożony pomyślnie.');
+        alert('The leave request has been successfully submitted');
 
         this.leaveType = 'regular';
         this.isOnDemand = false;
         this.startDate = '';
         this.endDate = '';
 
-        this.fetchUserHolidays(); // Aktualizujemy listę urlopów po złożeniu wniosku
+        this.fetchUserHolidays();
       } catch (error) {
-        alert(`Błąd: ${error.message}`);
+        alert(`Error: ${error.message}`);
       }
     },
 
@@ -135,13 +133,13 @@ export default {
         });
 
         if (!response.ok) {
-          throw new Error('Nie udało się pobrać listy urlopów.');
+          throw new Error('Failed to retrieve the list of vacations');
         }
 
         const data = await response.json();
         this.holidays = data;
       } catch (error) {
-        alert(`Błąd: ${error.message}`);
+        alert(`Error: ${error.message}`);
       }
     },
 
@@ -163,7 +161,7 @@ export default {
     }
   },
   mounted() {
-    this.fetchUserHolidays(); // Pobranie listy urlopów po załadowaniu komponentu
+    this.fetchUserHolidays();
   }
 };
 </script>
@@ -184,52 +182,52 @@ export default {
   display: flex;
   max-height: 70%;
   flex-direction: column;
-  border: 1px solid #ccc; /* Delikatny kontur */
-  border-radius: 8px; /* Zaokrąglone rogi */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Delikatny cień */
+  border: 1px solid #ccc;
+  border-radius: 8px; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .holidays-panel {
   width: 60%;
   padding: 20px;
   background-color: #f1f1f1;
-  border: 1px solid #ccc; /* Delikatny kontur */
-  border-radius: 8px; /* Zaokrąglone rogi dla lepszego efektu */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Delikatny cień */
-  margin: 0 auto; /* Wyśrodkowanie sekcji */
+  border: 1px solid #ccc; 
+  border-radius: 8px; 
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
+  margin: 0 auto; 
 }
 
 .holidays-panel h2 {
-  text-align: center; /* Wyśrodkowanie nagłówka */
-  margin-bottom: 20px; /* Dodanie odstępu pod nagłówkiem */
+  text-align: center; 
+  margin-bottom: 20px; 
 }
 
 .holiday-item {
   padding: 10px;
   background-color: #fff;
-  border: 1px solid #ddd; /* Delikatny kontur wokół każdego elementu */
-  border-radius: 4px; /* Subtelnie zaokrąglone rogi */
-  margin-bottom: 10px; /* Odstęp pomiędzy pozycjami */
+  border: 1px solid #ddd; 
+  border-radius: 4px; 
+  margin-bottom: 10px; 
   transition: background-color 0.3s ease;
 }
 
 .holiday-item {
   padding: 10px;
   background-color: #fff;
-  border-bottom: 1px solid #ddd; /* Linie oddzielające pozycje */
+  border-bottom: 1px solid #ddd;
 }
 
 .holiday-item.expired {
-  color: #888; /* Wygasłe urlopy będą bardziej wyblakłe */
+  color: #888; 
 }
 
 .holiday-item:last-child {
-  border-bottom: 0; /* Usuń linię na dole ostatniej pozycji */
+  border-bottom: 0; 
 }
 
 h1 {
   font-size: 1.8rem;
-  margin-bottom: 10px; /* Zmniejszono margines dolny dla mniejszych odstępów */
+  margin-bottom: 10px; 
 }
 
 h2 {
@@ -238,7 +236,7 @@ h2 {
 }
 
 .form-group {
-  margin-bottom: 15px; /* Zmniejszono margines dolny dla mniejszych odstępów */
+  margin-bottom: 15px; 
 }
 
 .form-group label {
@@ -294,19 +292,19 @@ input[type="date"] {
 }
 
 .holiday-item.expired {
-  background-color: #f0f0f0; /* Light gray for expired items */
+  background-color: #f0f0f0;
 }
 
 .status-pending {
-  color: #ffc107; /* Yellow */
+  color: #ffc107; 
 }
 
 .status-approved {
-  color: #28a745; /* Green */
+  color: #28a745; 
 }
 
 .status-rejected {
-  color: #dc3545; /* Red */
+  color: #dc3545; 
 }
 
 </style>

@@ -1,13 +1,12 @@
 <template>
   <div class="page-container">
-    <!-- Panel dodawania przeciwnika po lewej, zajmuje 25% wysokości -->
     <div class="add-employee-panel">
       <h1>Dodaj Pracownika</h1>
       <form @submit.prevent="addEmployee">
         <div class="form-group">
           <input
             v-model="newEmployee.name"
-            placeholder="Imię i nazwisko"
+            placeholder="First and last name"
             class="form-control"
             required
           />
@@ -17,7 +16,7 @@
           <input
             v-model="newEmployee.email"
             type="email"
-            placeholder="Adres e-mail"
+            placeholder="E-mail address"
             class="form-control"
             required
           />
@@ -27,7 +26,7 @@
           <input
             v-model="newEmployee.password"
             type="password"
-            placeholder="Hasło"
+            placeholder="Password"
             class="form-control"
             required
           />
@@ -37,13 +36,12 @@
           <input
             v-model="newEmployee.confirmPassword"
             type="password"
-            placeholder="Powtórz Hasło"
+            placeholder="Repeat password"
             class="form-control"
             required
           />
         </div>
 
-        <!-- Ustawienia godzin pracy dla każdego dnia tygodnia -->
         <div class="working-hours">
           <h2>Godziny pracy</h2>
           <div v-for="day in daysOfWeek" :key="day" class="day-row">
@@ -58,27 +56,25 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Dodaj Pracownika</button>
+        <button type="submit" class="btn btn-primary btn-block">Add Employee</button>
       </form>
     </div>
 
-    <!-- Lista pracowników po prawej, zajmuje 75% szerokości -->
     <div class="employee-list-panel">
       <h1>Lista Pracowników</h1>
       <ul class="employee-list">
         <li v-for="(employee, index) in employees" :key="index" class="employee-item">
           {{ employee.first_name }} {{ employee.last_name }} ({{ employee.email }})
-          <button @click="confirmRemoveEmployee(index)" class="btn btn-danger">Usuń</button>
+          <button @click="confirmRemoveEmployee(index)" class="btn btn-danger">Delete</button>
         </li>
       </ul>
     </div>
 
-    <!-- Modal potwierdzenia usunięcia -->
     <div v-if="showConfirmModal" class="confirm-modal">
       <div class="confirm-modal-content">
-        <p>Czy na pewno chcesz usunąć tego pracownika?</p>
-        <button @click="removeEmployee(confirmedIndex)" class="btn btn-danger">Tak</button>
-        <button @click="cancelRemoveEmployee" class="btn btn-secondary">Anuluj</button>
+        <p>Are you sure you want to delete this Employee?</p>
+        <button @click="removeEmployee(confirmedIndex)" class="btn btn-danger">Yes</button>
+        <button @click="cancelRemoveEmployee" class="btn btn-secondary">Cancel</button>
       </div>
     </div>
   </div>
@@ -104,15 +100,15 @@ export default {
           Sun: { start: '', duration: '8' }
         }
       },
-      employees: [],  // Store the list of employees here
+      employees: [],
       showConfirmModal: false,
       confirmedIndex: null,
       daysOfWeek: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      hours: Array.from({ length: 24 }, (v, k) => `${k}:00`) // Generates hours from 0:00 to 23:00
+      hours: Array.from({ length: 24 }, (v, k) => `${k}:00`)
     };
   },
   mounted() {
-    this.fetchEmployees();  // Fetch employees when the component is mounted
+    this.fetchEmployees(); 
   },
   methods: {
     async fetchEmployees() {
@@ -133,7 +129,7 @@ export default {
     },
     calculateEndTime(startTime, duration) {
       const [hours, minutes] = startTime.split(':').map(Number);
-      const endHours = (hours + Number(duration)) % 24;  // Handle overflow of 24 hours
+      const endHours = (hours + Number(duration)) % 24; 
       return `${endHours < 10 ? '0' : ''}${endHours}:${minutes < 10 ? '0' : ''}${minutes}`;
     },
     resetForm() {
@@ -160,7 +156,7 @@ export default {
               last_name: this.newEmployee.name.split(' ')[1] || '',
               email: this.newEmployee.email,
               password: this.newEmployee.password,
-              work_hours: this.getWorkHoursWithEndTimes()  // Now includes end times
+              work_hours: this.getWorkHoursWithEndTimes() 
             };
 
             const response = await fetch('http://127.0.0.1:8000/admin/add_user', {
@@ -239,8 +235,8 @@ export default {
 <style scoped>
 .page-container {
   display: flex;
-  margin-top: 250px; /* Adjust top margin as needed */
-  height: 100vh; /* Full height of the viewport */
+  margin-top: 250px; 
+  height: 100vh; 
   background-color: #f7f7f7;
 }
 
@@ -254,7 +250,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   border-right: 1px solid #ddd;
-  overflow-y: auto; /* Enable scrolling if content overflows */
+  overflow-y: auto; 
 }
 
 .employee-list-panel {
@@ -262,7 +258,7 @@ export default {
   flex-grow: 1;
   padding: 20px;
   background-color: #f1f1f1;
-  overflow-y: auto; /* Enable scrolling if content overflows */
+  overflow-y: auto;
 }
 
 .employee-list-panel h1 {

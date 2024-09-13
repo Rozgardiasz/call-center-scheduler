@@ -1,9 +1,8 @@
 <template>
   <div class="requests-wrapper">
     <div class="requests-inner">
-      <h1>Wnioski Urlopowe i Dni Wolne</h1>
+      <h1>Leave Requests and Days Off</h1>
 
-      <!-- Lista wniosków -->
       <ul class="requests-list">
         <li
           v-for="(request, index) in leaveRequests"
@@ -16,34 +15,31 @@
         >
           <div class="request-info">
            <b>{{ request.first_name }} {{ request.last_name }}</b> -
-            <!-- Conditional display of type_of_vacation -->
             <span v-if="request.type_of_vacation !== 'regular'">
             <b>{{ request.type_of_vacation }}</b>
             </span>
             od <b>{{ request.vacation_start }}</b> do <b>{{ request.vacation_end }}</b>
           </div>
           <div class="request-buttons">
-            <button @click="confirmApproveRequest(index)" class="btn btn-success">Akceptuj</button>
-            <button @click="confirmRejectRequest(index)" class="btn btn-danger">Odrzuć</button>
+            <button @click="confirmApproveRequest(index)" class="btn btn-success">Accept</button>
+            <button @click="confirmRejectRequest(index)" class="btn btn-danger">Reject</button>
           </div>
         </li>
       </ul>
 
-      <!-- Modal potwierdzenia akceptacji -->
       <div v-if="showConfirmApproveModal" class="confirm-modal">
         <div class="confirm-modal-content">
-          <p>Czy na pewno chcesz zaakceptować ten wniosek?</p>
-          <button @click="approveRequest(confirmedIndex)" class="btn btn-success">Tak</button>
-          <button @click="cancelConfirmApprove" class="btn btn-secondary">Anuluj</button>
+          <p>Are you sure you want to approve this request?</p>
+          <button @click="approveRequest(confirmedIndex)" class="btn btn-success">Yes</button>
+          <button @click="cancelConfirmApprove" class="btn btn-secondary">Cancel</button>
         </div>
       </div>
 
-      <!-- Modal potwierdzenia odrzucenia -->
       <div v-if="showConfirmRejectModal" class="confirm-modal">
         <div class="confirm-modal-content">
-          <p>Czy na pewno chcesz odrzucić ten wniosek?</p>
-          <button @click="rejectRequest(confirmedIndex)" class="btn btn-danger">Tak</button>
-          <button @click="cancelConfirmReject" class="btn btn-secondary">Anuluj</button>
+          <p>Are you sure you want to reject this request?</p>
+          <button @click="rejectRequest(confirmedIndex)" class="btn btn-danger">Yes</button>
+          <button @click="cancelConfirmReject" class="btn btn-secondary">Cancel</button>
         </div>
       </div>
     </div>
@@ -56,7 +52,7 @@ export default {
   name: 'LeaveRequests',
   data() {
     return {
-      leaveRequests: [], // Empty initially, will be fetched from the API
+      leaveRequests: [],
       showConfirmApproveModal: false,
       showConfirmRejectModal: false,
       confirmedIndex: null
@@ -66,7 +62,6 @@ export default {
     await this.fetchPendingHolidays();
   },
   methods: {
-    // Fetch pending holidays and map employee data
     async fetchPendingHolidays() {
       try {
         const response = await fetch('http://127.0.0.1:8000/holidays/pending', {
@@ -80,7 +75,6 @@ export default {
         
         let holidays = await response.json();
         
-        // Fetch employee details for each holiday request
         holidays = await Promise.all(
           holidays.map(async (holiday) => {
             const employeeResponse = await fetch(`http://127.0.0.1:8000/holidays/${holiday.employee_id}`, {
@@ -93,7 +87,7 @@ export default {
             if (!employeeResponse.ok) throw new Error('Failed to fetch employee data');
             
             const employee = await employeeResponse.json();
-            return { ...holiday, employee }; // Combine holiday and employee data
+            return { ...holiday, employee };
           })
         );
 
@@ -103,13 +97,10 @@ export default {
       }
     },
 
-    // Check if a request can be approved (custom logic can be applied here)
     canBeApproved(request) {
-      // Placeholder logic, adjust this to your approval conditions
       return request.status === 'pending';
     },
 
-    // Handle approval actions
     confirmApproveRequest(index) {
       this.showConfirmApproveModal = true;
       this.confirmedIndex = index;
@@ -121,7 +112,7 @@ export default {
     async approveRequest(index) {
       const request = this.leaveRequests[index];
       try {
-        const holidayId = this.leaveRequests[index].id; // Get the holiday request ID
+        const holidayId = this.leaveRequests[index].id; 
         const response = await fetch(`http://127.0.0.1:8000/admin/approve_holiday/${holidayId}`, {
           method: 'POST',
           headers: {
@@ -132,8 +123,8 @@ export default {
         });
         if (!response.ok) throw new Error('Failed to approve holiday');
         
-        this.leaveRequests.splice(index, 1); // Remove from list
-        alert('Wniosek został zaakceptowany.');
+        this.leaveRequests.splice(index, 1); 
+        alert('Request approved');
       } catch (error) {
         console.error('Error approving request:', error);
       }
@@ -144,7 +135,7 @@ export default {
     async rejectRequest(index) {
       const request = this.leaveRequests[index];
       try {
-        const holidayId = this.leaveRequests[index].id; // Get the holiday request ID
+        const holidayId = this.leaveRequests[index].id; 
         const response = await fetch(`http://127.0.0.1:8000/admin/reject_holiday/${holidayId}`, {
           method: 'POST',
           headers: {
@@ -155,8 +146,8 @@ export default {
         });
         if (!response.ok) throw new Error('Failed to reject holiday');
         
-        this.leaveRequests.splice(index, 1); // Remove from list
-        alert('Wniosek został odrzucony.');
+        this.leaveRequests.splice(index, 1); 
+        alert('Request rejected.');
       } catch (error) {
         console.error('Error rejecting request:', error);
       }
@@ -199,7 +190,7 @@ export default {
 .request-item {
   display: flex;
   justify-content: space-between;
-  align-items: center; /* Align items in the center vertically */
+  align-items: center;
   padding: 15px;
   margin: 10px 0;
   border-radius: 8px;
@@ -208,17 +199,17 @@ export default {
 
 .request-info {
   flex: 1;
-  margin-right: 20px; /* Add some margin to the right */
+  margin-right: 20px;
 }
 
 .request-buttons {
-  display: flex; /* Display buttons side by side */
+  display: flex;
 }
 
 .btn {
   padding: 10px 20px;
   font-size: 1rem;
-  margin-right: 5px; /* Small margin between buttons */
+  margin-right: 5px;
 }
 
 .can-approve {

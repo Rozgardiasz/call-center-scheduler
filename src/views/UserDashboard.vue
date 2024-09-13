@@ -1,17 +1,15 @@
 <template>
   <div class="auth-wrapper d-flex flex-column">
-    <!-- First Navbar Section -->
     <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
       <div class="container-fluid d-flex justify-content-between">
-        <button @click="logout" class="logout-link ml-auto">Wyloguj</button>
+        <button @click="logout" class="logout-link ml-auto">Logout</button>
       </div>
     </nav>
     
-    <!-- Second Navbar Section -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light"> <!-- Sekcja z białym tłem -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light"> 
       <div class="container-fluid">
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-          <ul class="navbar-nav list-unstyled d-flex gap-4"> <!-- Linki nawigacyjne wyśrodkowane -->
+          <ul class="navbar-nav list-unstyled d-flex gap-4">
             <li class="nav-item">
               <router-link to="/user-dashboard/info" class="nav-link">Info</router-link>
             </li>
@@ -26,7 +24,6 @@
       </div>
     </nav>
 
-    <!-- Content Section -->
     <div class="content-wrapper"> 
       <router-view />
     </div>
@@ -38,8 +35,8 @@ export default {
   name: 'UserDashboard',
   methods: {
     logout() {
-      sessionStorage.removeItem('token'); // Usuwanie tokena z sessionStorage
-      this.$router.push('/'); // Przekierowanie do strony logowania
+      sessionStorage.removeItem('token'); 
+      this.$router.push('/');
     }
   }
 };
@@ -56,26 +53,25 @@ p {
 }
 
 .logout-link {
-  background: none; /* Brak tła */
-  border: none; /* Brak obramowania */
-  color: white; /* Biały kolor tekstu */
-  font-size: 1.5rem; /* Większy rozmiar czcionki */
-  font-weight: 600; /* Pogrubienie tekstu */
-  text-decoration: none; /* Usunięcie podkreślenia */
-  cursor: pointer; /* Zmiana kursora na rękę */
-  padding: 0; /* Brak wewnętrznych marginesów */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
 }
 
 .logout-link:hover {
-  text-decoration: underline; /* Podkreślenie tekstu przy najechaniu */
-  /*color: rgba(255, 255, 255, 0.8); /* Subtelne zmniejszenie koloru */
+  text-decoration: underline;
 }
 
 .navbar-primary {
-  background-color: #1a73e8; /* Niebieskie tło dla pierwszej sekcji */
+  background-color: #1a73e8;
   padding: 10px 20px;
   height: 55px;
-  position: fixed; /* Stała pozycja na górze strony */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -84,48 +80,45 @@ p {
 }
 
 .navbar-light {
-  padding: 10px 0; /* Wewnętrzne odstępy */
-  position: fixed; /* Stała pozycja poniżej pierwszego navbaru */
-  top: 50px; /* Dopasowanie do wysokości pierwszej sekcji */
+  padding: 10px 0;
+  position: fixed;
+  top: 50px;
   left: 0;
   width: 100%;
-  z-index: 999; /* Mniejszy z-index, aby być poniżej pierwszej sekcji */
+  z-index: 999;
   background-color: #ffffff;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Delikatny cień */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid black;
 }
 
-
 .navbar-nav {
-  display: flex; /* Wyświetlanie elementów listy obok siebie */
-  justify-content: center; /* Wyśrodkowanie elementów na liście */
-  gap: 20px; /* Odstępy między elementami listy */
-  padding-left: 0; /* Usunięcie domyślnego wcięcia listy */
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding-left: 0;
 }
 
 .nav-item {
-  list-style: none; /* Usunięcie stylu listy */
+  list-style: none;
 }
 
 .nav-link {
-  color: #333 !important; /* Ciemniejszy kolor tekstu na białym tle */
-  font-size: 1.1rem; /* Nieco większy rozmiar czcionki */
-  font-weight: 500; /* Pogrubienie tekstu dla lepszej czytelności */
-  text-decoration: none !important; /* Usunięcie podkreślenia */
-  padding: 10px 15px; /* Wyrównanie wewnętrzne dla elementów nawigacyjnych */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Płynna animacja zmiany koloru tła i tekstu */
+  color: #333 !important;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-decoration: none !important;
+  padding: 10px 15px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .nav-link:hover {
-  background-color: rgba(26, 115, 232, 0.2); /* Niebieskie tło przy najechaniu */
-  color: #1a73e8 !important; /* Niebieski kolor tekstu przy najechaniu */
+  background-color: rgba(26, 115, 232, 0.2);
+  color: #1a73e8 !important;
 }
-
 
 .content-wrapper {
-  margin-top: 110px; /* Dopasowanie marginesu górnego do wysokości obu sekcji navbaru */
-  padding: 20px; /* Dodanie odstępu dla lepszej prezentacji treści */
-  
-
+  margin-top: 110px;
+  padding: 20px;
 }
+
 </style>

@@ -1,13 +1,11 @@
 <template>
   <div class="auth-wrapper d-flex flex-column">
-    <!-- First Navbar Section -->
     <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
       <div class="container-fluid">
-        <button @click="logout" class="logout-link ml-auto">Wyloguj</button>
+        <button @click="logout" class="logout-link ml-auto">Logout</button>
       </div>
     </nav>
     
-    <!-- Second Navbar Section -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
         <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
@@ -23,7 +21,6 @@
       </div>
     </nav>
 
-    <!-- Content Section -->
     <div class="content-wrapper"> 
       <router-view />
     </div>
@@ -35,8 +32,8 @@ export default {
   name: 'AdminDashboard',
   methods: {
     logout() {
-      sessionStorage.removeItem('token'); // Usuwanie tokena z sessionStorage
-      this.$router.push('/'); // Przekierowanie do strony logowania
+      sessionStorage.removeItem('token');
+      this.$router.push('/');
     }
   }
 };
@@ -44,7 +41,7 @@ export default {
 
 <style scoped>
 .navbar-primary {
-  background-color: #1a73e8; /* Niebieskie tło */
+  background-color: #1a73e8; 
   padding: 10px 20px;
   height: 55px;
   position: fixed;
@@ -52,7 +49,7 @@ export default {
   left: 0;
   width: 100%;
   z-index: 1000;
-  border-bottom: 2px solid black; /* Delikatny kontur */
+  border-bottom: 2px solid black; 
 }
 
 .navbar-light {
@@ -63,20 +60,9 @@ export default {
   width: 100%;
   z-index: 999;
   background-color: #ffffff;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Cień */
-  border-bottom: 1px solid black; /* Kontur dla przejrzystości */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid black; 
 }
-
-/* .dashboard-link {
-  color: white !important;
-  font-size: 1.5rem;
-  font-weight: 600;
-  text-decoration: none !important;
-}
-
-.dashboard-link:hover {
-  text-decoration: underline;
-} */
 
 
 .logout-link {
@@ -107,17 +93,17 @@ export default {
 }
 
 .nav-link {
-  color: #333 !important; /* Ciemniejszy kolor tekstu na białym tle */
-  font-size: 1.1rem; /* Nieco większy rozmiar czcionki */
-  font-weight: 500; /* Pogrubienie tekstu dla lepszej czytelności */
-  text-decoration: none !important; /* Usunięcie podkreślenia */
-  padding: 10px 15px; /* Wyrównanie wewnętrzne dla elementów nawigacyjnych */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Płynna animacja zmiany koloru tła i tekstu */
+  color: #333 !important;
+  font-size: 1.1rem;
+  font-weight: 500; 
+  text-decoration: none !important;
+  padding: 10px 15px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .nav-link:hover {
-  background-color: rgba(26, 115, 232, 0.2); /* Niebieskie tło przy najechaniu */
-  color: #1a73e8 !important; /* Niebieski kolor tekstu przy najechaniu */
+  background-color: rgba(26, 115, 232, 0.2);
+  color: #1a73e8 !important; 
 }
 
 .content-wrapper {

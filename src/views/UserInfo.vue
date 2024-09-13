@@ -4,7 +4,6 @@
       <h1>Welcome, {{ employeeName }}!</h1>
       <p>You have <b>{{ totalLeaveDays }}</b> <i>(including <b>{{ totalOnDemandLeaveDays }}</b> on demand days)</i> vacation days left for <b>{{ currentYear }}</b>.</p>
       <p>You've already taken <b>{{ totalLeaveDays }}</b> vacation days this year!</p>
-      <!-- Conditionally display the paragraph only if nextVacationDate is not empty -->
       <p v-if="nextVacationDate">Your next vacation starts on: <b>{{ nextVacationDate }}</b></p>
     </div>
   </div>
@@ -23,7 +22,7 @@ export default {
       availableVacationDays: '',
       nextVacationDate: '',
       holidays: [],
-      workingHours: {}, // Store working hours
+      workingHours: {},
       currentYear: new Date().getFullYear(),
       totalLeaveDays: 0,
       totalOnDemandLeaveDays: 0,
@@ -61,7 +60,6 @@ export default {
     },
 
     parseWorkingHours(workHours) {
-      // Initialize working hours for all weekdays as non-working
       const defaultWorkingHours = {
         Mon: false,
         Tue: false,
@@ -73,7 +71,6 @@ export default {
       };
 
       workHours.forEach((workHour) => {
-        // Treat Saturday and Sunday as non-working days regardless
         if (workHour.weekday !== 'Sat' && workHour.weekday !== 'Sun') {
           defaultWorkingHours[workHour.weekday] = true;
         }
@@ -130,7 +127,6 @@ export default {
               const dayOfWeek = currentDate.toLocaleString('en-US', { weekday: 'short' });
 
               if (this.workingHours[dayOfWeek]) {
-                // Increment only if it's a working day
                 totalDays += 1;
                 if (holiday.type_of_vacation == "on_demand") {
                   totalDemandDays += 1;
@@ -167,7 +163,6 @@ export default {
           }
         }
       });
-      // Set the nextVacationDate only if a next date is found
       this.nextVacationDate = nextDate ? nextDate.toISOString().split('T')[0] : '';
     },
   },
@@ -181,17 +176,17 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: None; /* Używamy tła pierwotnie ustawionego w bg-primary */
+  background-color: None; 
   padding: 20px;
 }
 
 .user-info-box {
-  background-color: white; /* Białe tło dla ramki */
-  color: #333; /* Kolor tekstu */
+  background-color: white; 
+  color: #333; 
   padding: 30px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Lekki cień */
-  border: 2px solid black; /* Czarny kontur 2px */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  border: 2px solid black; 
   max-width: 600px;
   text-align: center;
 }
@@ -207,7 +202,7 @@ p {
 }
 
 b {
-  color: #1a73e8; /* Kolor akcentujący liczby */
+  color: #1a73e8; 
 }
 </style>
 
