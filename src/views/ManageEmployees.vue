@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="add-employee-panel">
-      <h1>Dodaj Pracownika</h1>
+      <h1>Add Employee</h1>
       <form @submit.prevent="addEmployee">
         <div class="form-group">
           <input
@@ -43,7 +43,7 @@
         </div>
 
         <div class="working-hours">
-          <h2>Godziny pracy</h2>
+          <h2>Working Hours</h2>
           <div v-for="day in daysOfWeek" :key="day" class="day-row">
             <label>{{ day }}:</label>
             <select v-model="newEmployee.workingHours[day].start" class="form-control">
@@ -61,7 +61,7 @@
     </div>
 
     <div class="employee-list-panel">
-      <h1>Lista Pracowników</h1>
+      <h1>List of Employees</h1>
       <ul class="employee-list">
         <li v-for="(employee, index) in employees" :key="index" class="employee-item">
           {{ employee.first_name }} {{ employee.last_name }} ({{ employee.email }})
