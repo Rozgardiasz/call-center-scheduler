@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <div class="request-panel">
-      <h1>Wnioski o Urlop</h1>
+      <h1>Create a request</h1>
 
       <form @submit.prevent="submitLeaveRequest">
         <div class="form-group">

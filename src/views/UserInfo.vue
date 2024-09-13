@@ -3,7 +3,7 @@
     <div class="user-info-box text-center">
       <h1>Welcome, {{ employeeName }}!</h1>
       <p>You have <b>{{ totalLeaveDays }}</b> <i>(including <b>{{ totalOnDemandLeaveDays }}</b> on demand days)</i> vacation days left for <b>{{ currentYear }}</b>.</p>
-      <p>You've already taken <b>{{ totalLeaveDays }}</b> vacation days this year!</p>
+      <p>You've already taken <b>{{ LeaveDaysTaken }}</b> vacation days this year!</p>
       <p v-if="nextVacationDate">Your next vacation starts on: <b>{{ nextVacationDate }}</b></p>
     </div>
   </div>
@@ -25,6 +25,7 @@ export default {
       workingHours: {},
       currentYear: new Date().getFullYear(),
       totalLeaveDays: 0,
+      LeaveDaysTaken: 0,
       totalOnDemandLeaveDays: 0,
     };
   },
@@ -139,6 +140,7 @@ export default {
         }
       });
 
+      this.LeaveDaysTaken = totalDays;
       totalDays = 20 - totalDays;
       totalDemandDays = 4 - totalDemandDays;
 

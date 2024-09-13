@@ -2,7 +2,7 @@
   <div class="auth-wrapper d-flex flex-column">
     <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
       <div class="container-fluid">
-        <button @click="logout" class="logout-link ml-auto">Logout</button>
+        <button @click="logout" class="logout-link ml-auto">Logout <i>(admin)</i></button>
       </div>
     </nav>
     

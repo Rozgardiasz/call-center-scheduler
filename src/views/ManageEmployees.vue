@@ -2,7 +2,7 @@
   <div class="page-container">
     <div class="add-employee-panel">
       <h1>Add Employee</h1>
-      <form @submit.prevent="addEmployee">
+      <form @submit="addEmployee">
         <div class="form-group">
           <input
             v-model="newEmployee.name"
