@@ -15,26 +15,23 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# List of allowed origins
 origins = [
     "http://localhost:8080",
-    "http://127.0.0.1:8080"  # Add any other origins if needed
+    "http://127.0.0.1:8080"  
 ]
 
-# Adding CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Allows these origins
-    allow_credentials=True,  # Allows sending cookies with cross-origin requests
-    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allows all headers (e.g., Authorization)
+    allow_origins=origins, 
+    allow_credentials=True,  
+    allow_methods=["*"],  
+    allow_headers=["*"],  
 )
 
 
 
 Base.metadata.create_all(bind=engine)
 
-# Dependency
 def get_db():
     db = SessionLocal()
     try:
@@ -54,12 +51,10 @@ async def login(credentials: schemas.EmployeeLogin, db: Session = Depends(get_db
 
 @app.post("/admin/add_user")
 def add_user(user: schemas.EmployeeCreate, request: Request, db: Session = Depends(get_db)):
-    get_current_active_admin(request, db)  # Ensure user is admin
+    get_current_active_admin(request, db) 
 
-    # Add the employee
     employee = crud.add_employee(db, user)
 
-    # Add work hours for the employee
     for work_hour in user.work_hours:
         crud.add_work_hour(db, employee.id, work_hour)
 
@@ -68,7 +63,7 @@ def add_user(user: schemas.EmployeeCreate, request: Request, db: Session = Depen
 
 @app.post("/holiday_request")
 def request_holiday(holiday: schemas.VacationCreate, request: Request, db: Session = Depends(get_db)):
-    get_current_user(request, db)  # Ensure user is authenticated
+    get_current_user(request, db)  
 
     vacation_start_date = datetime.strptime(holiday.vacation_start, '%Y-%m-%d').date()
     vacation_end_date = datetime.strptime(holiday.vacation_end, '%Y-%m-%d').date()
@@ -94,7 +89,7 @@ def request_holiday(holiday: schemas.VacationCreate, request: Request, db: Sessi
 
 @app.post("/admin/approve_holiday/{holiday_id}", status_code = 200)
 def approve_holiday(holiday_id: int, request: Request, db: Session = Depends(get_db)):
-    get_current_active_admin(request, db)  # Ensure user is admin
+    get_current_active_admin(request, db)
     vacation = crud.get_vacation_request(db, holiday_id)
     if vacation.type_of_vacation == "on_demand":
         crud.approve_vacation_request(db, holiday_id)
@@ -105,7 +100,7 @@ def approve_holiday(holiday_id: int, request: Request, db: Session = Depends(get
 
 @app.post("/admin/reject_holiday/{holiday_id}",status_code = 200)
 def reject_holiday(holiday_id: int, request: Request, db: Session = Depends(get_db)):
-    get_current_active_admin(request, db)  # Ensure user is admin
+    get_current_active_admin(request, db) 
     vacation = crud.get_vacation_request(db, holiday_id)
     if vacation.status != 'pending':
         raise HTTPException(status_code=400, detail="Vacation request is not pending")
@@ -129,16 +124,15 @@ def view_working_hours(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/holidays/pending")
 def get_pending_holidays(request: Request, db: Session = Depends(get_db)):
-    get_current_active_admin(request, db)  # Ensure user is admin
+    get_current_active_admin(request, db)  
     pending_holidays = crud.get_pending_holidays(db)
     
-    # Formatowanie zwróconych danych, uwzględniając pracownika
     return [
         {
             "id": holiday.Vacation.id,
             "employee_id": holiday.Employee.id,
-            "first_name": holiday.Employee.first_name,  # Zaciągnięte z powiązanego pracownika
-            "last_name": holiday.Employee.last_name,    # Zaciągnięte z powiązanego pracownika
+            "first_name": holiday.Employee.first_name,  
+            "last_name": holiday.Employee.last_name,    
             "vacation_start": holiday.Vacation.vacation_start,
             "vacation_end": holiday.Vacation.vacation_end,
             "type_of_vacation": holiday.Vacation.type_of_vacation,
@@ -151,24 +145,21 @@ def get_pending_holidays(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/holidays/{user_id}", response_model=List[schemas.Vacation])
 def get_user_holidays(user_id: int, request: Request, db: Session = Depends(get_db)):
-    # get_current_active_admin(request, db)  # Ensure user is admin
     user_holidays = crud.get_user_holidays(db, user_id)
     return user_holidays
 
 @app.get("/admin/users", response_model=List[schemas.Employee])
 def get_all_users(request: Request, db: Session = Depends(get_db)):
-    get_current_active_admin(request, db)  # Ensure user is admin
+    get_current_active_admin(request, db) 
     all_users = crud.get_all_users(db)
     return all_users
 
 @app.delete("/admin/remove_user/{user_id}")
 def remove_user(user_id: int, request: Request, db: Session = Depends(get_db)):
-    # Ensure the user making the request is an admin
     current_admin = get_current_active_admin(request, db)
     if not current_admin:
         raise HTTPException(status_code=403, detail="Only admins can remove users")
 
-    # Fetch the user from the database
     user = crud.get_user_by_id(db, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -176,7 +167,6 @@ def remove_user(user_id: int, request: Request, db: Session = Depends(get_db)):
     if user.is_admin:
         raise HTTPException(status_code=403, detail="Admins cannot be removed")
 
-    # Delete the user from the database
     crud.delete_user(db, user_id)
     return {"message": "User successfully removed"}
 
@@ -185,7 +175,6 @@ def remove_user(user_id: int, request: Request, db: Session = Depends(get_db)):
 def can_approve_holiday(request: Request, holiday: schemas.VacationCreate, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
 
-    # Convert string to datetime
     try:
         vacation_start = datetime.strptime(holiday.vacation_start, "%Y-%m-%d")
         vacation_end = datetime.strptime(holiday.vacation_end, "%Y-%m-%d")

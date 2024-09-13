@@ -28,20 +28,16 @@ def decode_jwt_token(token: str) -> Dict:
 
 
 def get_current_user(request: Request, db: Session) -> Employee:
-    # Get the Authorization header
     auth_header = request.headers.get("Authorization")
 
-    # If the Authorization header is missing, raise an error
     if not auth_header:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    # Split the header to separate 'Bearer' and the token
     try:
-        token = auth_header.split(" ")[1]  # Extract the token part
+        token = auth_header.split(" ")[1]  
     except IndexError:
         raise HTTPException(status_code=401, detail="Invalid authorization format")
 
-    # Now 'token' should contain the JWT token string
     try:
         payload = decode_jwt_token(token)
         user = db.query(Employee).filter(Employee.id == payload.get("user_id")).first()

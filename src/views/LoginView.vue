@@ -1,7 +1,7 @@
 <template>
   <div class="auth-wrapper">
     <div class="auth-inner">
-      <h1>Logowanie</h1>
+      <h1>Login</h1>
       <form @submit.prevent="login">
         <div class="form-group">
           <input
@@ -27,7 +27,7 @@
 
         <div class="button-group">
           <button type="submit" class="btn btn-primary btn-block">
-            Zaloguj
+            Log in
           </button>
         </div>
       </form>
@@ -47,7 +47,6 @@ export default {
   methods: {
     async login() {
       try {
-        // Sending a POST request to the server
         const response = await fetch('http://127.0.0.1:8000/login', {
           method: 'POST',
           headers: {
@@ -60,19 +59,15 @@ export default {
           })
         });
 
-        // Checking if the server response is valid
         if (!response.ok) {
           throw new Error('Login failed. Please check your credentials.');
         }
 
-        // Processing the response from the server
         const data = await response.json();
-        alert(`Logged in as: ${data.first_name} ${data.last_name}`);
         
         sessionStorage.setItem('first_name', data.first_name);
         sessionStorage.setItem('last_name', data.last_name);
 
-        // Using 'this' to call the correct methods
         sessionStorage.setItem('token', data.token); 
         if (data.is_admin) {
           this.loginAsAdmin();
@@ -104,7 +99,7 @@ export default {
   justify-content: center;
   height: 70vh;
   background-color: #f7f7f7;
-  margin-top: 50px; /* Dodanie marginesu z góry */
+  margin-top: 50px; 
 }
 
 .auth-inner {
@@ -129,7 +124,7 @@ h1 {
 
 input {
   width: 100%;
-  max-width: 300px; /* Maksymalna szerokość pól tekstowych */
+  max-width: 300px;
   font-size: 1.2rem;
   padding: 10px;
   margin: 0 auto;
@@ -138,8 +133,8 @@ input {
 }
 
 input::placeholder {
-  color: #888; /* Kolor tekstu placeholdera */
-  font-size: 1.2rem; /* Rozmiar czcionki placeholdera */
+  color: #888; 
+  font-size: 1.2rem; 
 }
 
 .button-group {

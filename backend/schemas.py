@@ -18,7 +18,7 @@ class WorkHourCreate(BaseModel):
 
 class EmployeeCreate(EmployeeBase):
     password: str
-    work_hours: List[WorkHourCreate]  # Add this field to accept work hours
+    work_hours: List[WorkHourCreate]  
 
 
 class Employee(EmployeeBase):
@@ -51,8 +51,8 @@ class VacationBase(BaseModel):
 
 class VacationCreate(BaseModel):
     employee_id: int
-    vacation_start: str  # Ensure this matches the expected format
-    vacation_end: str  # Ensure this matches the expected format
+    vacation_start: str  
+    vacation_end: str  
     type_of_vacation: str
 
 
