@@ -2,21 +2,30 @@
   <div class="requests-wrapper">
     <div class="requests-inner">
       <h1>Wnioski Urlopowe i Dni Wolne</h1>
-      
+
       <!-- Lista wniosków -->
       <ul class="requests-list">
-          <li 
-          v-for="(request, index) in leaveRequests" 
-          :key="index" 
+        <li
+          v-for="(request, index) in leaveRequests"
+          :key="index"
           :class="{
             'request-item': true,
             'can-approve': canBeApproved(request),
-            'cannot-approve': !canBeApproved(request)
+            'cannot-approve': !canBeApproved(request),
           }"
         >
-          {{ request.first_name }} {{ request.last_name }} - {{ request.type_of_vacation }} od {{ request.vacation_start }} do {{ request.vacation_end }}
-          <button @click="confirmApproveRequest(index)" class="btn btn-success">Akceptuj</button>
-          <button @click="confirmRejectRequest(index)" class="btn btn-danger">Odrzuć</button>
+          <div class="request-info">
+           <b>{{ request.first_name }} {{ request.last_name }}</b> -
+            <!-- Conditional display of type_of_vacation -->
+            <span v-if="request.type_of_vacation !== 'regular'">
+            <b>{{ request.type_of_vacation }}</b>
+            </span>
+            od <b>{{ request.vacation_start }}</b> do <b>{{ request.vacation_end }}</b>
+          </div>
+          <div class="request-buttons">
+            <button @click="confirmApproveRequest(index)" class="btn btn-success">Akceptuj</button>
+            <button @click="confirmRejectRequest(index)" class="btn btn-danger">Odrzuć</button>
+          </div>
         </li>
       </ul>
 
@@ -177,35 +186,47 @@ export default {
   justify-content: center;
   height: 70vh;
   background-color: #f7f7f7;
-  margin-top: 50px; /* Dodanie marginesu z góry */
-}
-
-.requests-wrapper {
+  margin-top: 50px;
   padding: 20px;
 }
 
 .requests-list {
-  list-style-type: none;
+  list-style: none;
   padding: 0;
+  margin-top: 20px;
 }
 
 .request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Align items in the center vertically */
   padding: 15px;
   margin: 10px 0;
   border-radius: 8px;
   border: 1px solid #ccc;
 }
 
-.can-approve {
-  background-color: #d4edda; /* Light green for approvable requests */
+.request-info {
+  flex: 1;
+  margin-right: 20px; /* Add some margin to the right */
 }
 
-.cannot-approve {
-  background-color: #f8d7da; /* Light red for non-approvable requests */
+.request-buttons {
+  display: flex; /* Display buttons side by side */
 }
 
 .btn {
-  margin-left: 10px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  margin-right: 5px; /* Small margin between buttons */
+}
+
+.can-approve {
+  background-color: #ffffff; 
+}
+
+.cannot-approve {
+  background-color: #f8d7da; 
 }
 
 .confirm-modal {
@@ -228,38 +249,17 @@ export default {
 }
 
 .requests-inner {
-  background-color: #ffffff;
   padding: 50px;
   border-radius: 8px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 700px;
-  text-align: center; /* Wyśrodkowanie zawartości formularza */
+  text-align: center;
 }
 
 h1 {
   margin-bottom: 30px;
   text-align: center;
   font-size: 2rem;
-}
-
-.requests-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 20px;
-}
-
-.request-item {
-  margin-bottom: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.btn {
-  padding: 10px 20px;
-  font-size: 1rem;
-  margin: 0 5px;
 }
 
 .btn-success {
@@ -280,28 +280,5 @@ h1 {
 .btn-danger:hover {
   background-color: #c82333;
   border-color: #bd2130;
-}
-
-.confirm-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.confirm-modal-content {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.confirm-modal-content .btn {
-  margin: 5px;
 }
 </style>

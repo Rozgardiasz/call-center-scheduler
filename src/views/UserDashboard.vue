@@ -1,10 +1,9 @@
 <template>
   <div class="auth-wrapper d-flex flex-column">
     <!-- First Navbar Section -->
-    <nav class="navbar navbar-expand-lg navbar-primary bg-primary"> <!-- Sekcja z niebieskim tłem -->
-      <div class="container-fluid">
-        <button @click="logout" class="dashboard-link logout-link">Wyloguj</button>
-        <router-link to="/user-dashboard/info" class="dashboard-link">Dashboard</router-link>
+    <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
+      <div class="container-fluid d-flex justify-content-between">
+        <button @click="logout" class="logout-link ml-auto">Wyloguj</button>
       </div>
     </nav>
     
@@ -68,18 +67,20 @@ p {
 }
 
 .logout-link:hover {
-  color: white; /* Kolor tekstu przy najechaniu */
   text-decoration: underline; /* Podkreślenie tekstu przy najechaniu */
+  /*color: rgba(255, 255, 255, 0.8); /* Subtelne zmniejszenie koloru */
 }
 
 .navbar-primary {
   background-color: #1a73e8; /* Niebieskie tło dla pierwszej sekcji */
   padding: 10px 20px;
+  height: 55px;
   position: fixed; /* Stała pozycja na górze strony */
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
+  border-bottom: 2px solid black;
 }
 
 .navbar-light {
@@ -91,14 +92,9 @@ p {
   z-index: 999; /* Mniejszy z-index, aby być poniżej pierwszej sekcji */
   background-color: #ffffff;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Delikatny cień */
+  border-bottom: 1px solid black;
 }
 
-.dashboard-link {
-  color: white !important; /* Biały kolor tekstu */
-  font-size: 1.5rem; /* Większy rozmiar czcionki */
-  font-weight: 600; /* Pogrubienie tekstu dla wyróżnienia */
-  text-decoration: none !important; /* Usunięcie podkreślenia */
-}
 
 .navbar-nav {
   display: flex; /* Wyświetlanie elementów listy obok siebie */
@@ -117,12 +113,14 @@ p {
   font-weight: 500; /* Pogrubienie tekstu dla lepszej czytelności */
   text-decoration: none !important; /* Usunięcie podkreślenia */
   padding: 10px 15px; /* Wyrównanie wewnętrzne dla elementów nawigacyjnych */
-  transition: color 0.3s ease-in-out; /* Płynna animacja zmiany koloru tekstu */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Płynna animacja zmiany koloru tła i tekstu */
 }
 
 .nav-link:hover {
-  color: #1a73e8 !important; /* Niebieski kolor tekstu przy najechaniu kursorem */
+  background-color: rgba(26, 115, 232, 0.2); /* Niebieskie tło przy najechaniu */
+  color: #1a73e8 !important; /* Niebieski kolor tekstu przy najechaniu */
 }
+
 
 .content-wrapper {
   margin-top: 110px; /* Dopasowanie marginesu górnego do wysokości obu sekcji navbaru */

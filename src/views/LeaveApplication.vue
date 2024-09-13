@@ -1,19 +1,13 @@
 <template>
   <div class="page-container">
+    <!-- Panel dodawania wniosków o urlop po lewej, zajmujący 30% szerokości -->
     <div class="request-panel">
       <h1>Wnioski o Urlop</h1>
 
       <form @submit.prevent="submitLeaveRequest">
         <div class="form-group">
           <label for="start-date">Data rozpoczęcia:</label>
-          <input
-            type="date"
-            v-model="startDate"
-            id="start-date"
-            class="form-control"
-            required
-            :min="todayDate"
-          />
+          <input type="date" v-model="startDate" id="start-date" class="form-control" required />
         </div>
 
         <div class="form-group">
@@ -24,7 +18,7 @@
             id="end-date"
             class="form-control"
             required
-            :min="minEndDate"
+            :min="startDate"
           />
         </div>
 
@@ -41,6 +35,7 @@
       </form>
     </div>
 
+    <!-- Panel wyświetlania wniosków o urlop po prawej, zajmujący 70% szerokości -->
     <div class="holidays-panel">
       <h2>Twoje Urlopy</h2>
       <ul v-if="holidays.length">
@@ -59,7 +54,6 @@
   </div>
 </template>
 
-
 <script>
 import { jwtDecode } from 'jwt-decode';
 
@@ -67,24 +61,12 @@ export default {
   name: 'LeaveApplication',
   data() {
     return {
-      leaveType: 'regular', 
-      isOnDemand: false,
+      leaveType: 'regular', // Domyślny typ urlopu
+      isOnDemand: false, // Stan checkboxa
       startDate: '',
       endDate: '',
-      holidays: [] 
+      holidays: [] // Przechowywanie urlopów użytkownika
     };
-  },
-  computed: {
-    todayDate() {
-      return new Date().toISOString().split('T')[0];
-    },
-    minEndDate() {
-
-      if (this.startDate) {
-        return this.startDate > this.todayDate ? this.startDate : this.todayDate;
-      }
-      return this.todayDate;
-    }
   },
   watch: {
     isOnDemand(newVal) {
@@ -132,7 +114,7 @@ export default {
         this.startDate = '';
         this.endDate = '';
 
-        this.fetchUserHolidays(); 
+        this.fetchUserHolidays(); // Aktualizujemy listę urlopów po złożeniu wniosku
       } catch (error) {
         alert(`Błąd: ${error.message}`);
       }
@@ -181,18 +163,16 @@ export default {
     }
   },
   mounted() {
-    this.fetchUserHolidays(); 
+    this.fetchUserHolidays(); // Pobranie listy urlopów po załadowaniu komponentu
   }
 };
 </script>
-
-
 
 <style scoped>
 .page-container {
   display: flex;
   height: 70vh;
-  background-color: #f7f7f7;
+  background-color: #f3f3f3;
   margin-top: 50px;
 }
 
@@ -204,17 +184,52 @@ export default {
   display: flex;
   max-height: 70%;
   flex-direction: column;
+  border: 1px solid #ccc; /* Delikatny kontur */
+  border-radius: 8px; /* Zaokrąglone rogi */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Delikatny cień */
 }
 
 .holidays-panel {
-  flex-basis: 70%;
+  width: 60%;
   padding: 20px;
   background-color: #f1f1f1;
+  border: 1px solid #ccc; /* Delikatny kontur */
+  border-radius: 8px; /* Zaokrąglone rogi dla lepszego efektu */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Delikatny cień */
+  margin: 0 auto; /* Wyśrodkowanie sekcji */
+}
+
+.holidays-panel h2 {
+  text-align: center; /* Wyśrodkowanie nagłówka */
+  margin-bottom: 20px; /* Dodanie odstępu pod nagłówkiem */
+}
+
+.holiday-item {
+  padding: 10px;
+  background-color: #fff;
+  border: 1px solid #ddd; /* Delikatny kontur wokół każdego elementu */
+  border-radius: 4px; /* Subtelnie zaokrąglone rogi */
+  margin-bottom: 10px; /* Odstęp pomiędzy pozycjami */
+  transition: background-color 0.3s ease;
+}
+
+.holiday-item {
+  padding: 10px;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd; /* Linie oddzielające pozycje */
+}
+
+.holiday-item.expired {
+  color: #888; /* Wygasłe urlopy będą bardziej wyblakłe */
+}
+
+.holiday-item:last-child {
+  border-bottom: 0; /* Usuń linię na dole ostatniej pozycji */
 }
 
 h1 {
   font-size: 1.8rem;
-  margin-bottom: 10px; 
+  margin-bottom: 10px; /* Zmniejszono margines dolny dla mniejszych odstępów */
 }
 
 h2 {
@@ -223,7 +238,7 @@ h2 {
 }
 
 .form-group {
-  margin-bottom: 15px; 
+  margin-bottom: 15px; /* Zmniejszono margines dolny dla mniejszych odstępów */
 }
 
 .form-group label {
@@ -243,7 +258,8 @@ input[type="date"] {
 .checkbox-group {
   display: flex;
   align-items: center;
-  margin-top: 10px; 
+  margin-top: 25px;
+  margin-bottom: 10px;
 }
 
 .checkbox-group input {
@@ -278,18 +294,19 @@ input[type="date"] {
 }
 
 .holiday-item.expired {
-  background-color: #f0f0f0; 
+  background-color: #f0f0f0; /* Light gray for expired items */
 }
 
 .status-pending {
-  color: #ffc107; 
+  color: #ffc107; /* Yellow */
 }
+
 .status-approved {
-  color: #28a745; 
+  color: #28a745; /* Green */
 }
 
 .status-rejected {
-  color: #dc3545; 
+  color: #dc3545; /* Red */
 }
 
 </style>

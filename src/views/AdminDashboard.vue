@@ -2,9 +2,8 @@
   <div class="auth-wrapper d-flex flex-column">
     <!-- First Navbar Section -->
     <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
-      <div class="container-fluid d-flex justify-content-between">
-        <button @click="logout" class="dashboard-link logout-link">Wyloguj</button> <!-- Zmieniono router-link na a z @click -->
-        <router-link to="/admin-dashboard/manage-employees" class="dashboard-link ml-auto">Dashboard</router-link>
+      <div class="container-fluid">
+        <button @click="logout" class="logout-link ml-auto">Wyloguj</button>
       </div>
     </nav>
     
@@ -43,65 +42,68 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .navbar-primary {
-  background-color: #1a73e8; /* Niebieskie tło dla pierwszej sekcji */
+  background-color: #1a73e8; /* Niebieskie tło */
   padding: 10px 20px;
-  position: fixed; /* Stała pozycja na górze strony */
+  height: 55px;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 1000;
+  border-bottom: 2px solid black; /* Delikatny kontur */
 }
 
 .navbar-light {
-  padding: 10px 0; /* Wewnętrzne odstępy */
-  position: fixed; /* Stała pozycja poniżej pierwszego navbaru */
-  top: 50px; /* Dopasowanie do wysokości pierwszej sekcji */
+  padding: 10px 0;
+  position: fixed;
+  top: 50px;
   left: 0;
   width: 100%;
-  z-index: 999; /* Mniejszy z-index, aby być poniżej pierwszej sekcji */
+  z-index: 999;
   background-color: #ffffff;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Delikatny cień */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Cień */
+  border-bottom: 1px solid black; /* Kontur dla przejrzystości */
 }
 
-.dashboard-link {
-  color: white !important; /* Biały kolor tekstu */
-  font-size: 1.5rem; /* Większy rozmiar czcionki */
-  font-weight: 600; /* Pogrubienie tekstu dla wyróżnienia */
-  text-decoration: none !important; /* Usunięcie podkreślenia */
+/* .dashboard-link {
+  color: white !important;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-decoration: none !important;
 }
+
+.dashboard-link:hover {
+  text-decoration: underline;
+} */
+
 
 .logout-link {
-  background: none; /* Brak tła */
-  border: none; /* Brak obramowania */
-  color: white; /* Biały kolor tekstu */
-  font-size: 1.5rem; /* Większy rozmiar czcionki */
-  font-weight: 600; /* Pogrubienie tekstu */
-  text-decoration: none; /* Usunięcie podkreślenia */
-  cursor: pointer; /* Zmiana kursora na rękę */
-  padding: 0; /* Brak wewnętrznych marginesów */
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
 }
 
 .logout-link:hover {
-  color: white; /* Kolor tekstu przy najechaniu */
-  text-decoration: underline; /* Podkreślenie tekstu przy najechaniu */
-}
-
-.ml-auto {
-  margin-left: auto; /* Margines automatyczny po lewej stronie */
+  text-decoration: underline;
 }
 
 .navbar-nav {
-  display: flex; /* Wyświetlanie elementów listy obok siebie */
-  justify-content: center; /* Wyśrodkowanie elementów na liście */
-  gap: 20px; /* Odstępy między elementami listy */
-  padding-left: 0; /* Usunięcie domyślnego wcięcia listy */
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding-left: 0;
 }
 
 .nav-item {
-  list-style: none; /* Usunięcie stylu listy */
+  list-style: none;
 }
 
 .nav-link {
@@ -110,18 +112,16 @@ export default {
   font-weight: 500; /* Pogrubienie tekstu dla lepszej czytelności */
   text-decoration: none !important; /* Usunięcie podkreślenia */
   padding: 10px 15px; /* Wyrównanie wewnętrzne dla elementów nawigacyjnych */
-  transition: color 0.3s ease-in-out; /* Płynna animacja zmiany koloru tekstu */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Płynna animacja zmiany koloru tła i tekstu */
 }
 
 .nav-link:hover {
-  color: #1a73e8 !important; /* Niebieski kolor tekstu przy najechaniu kursorem */
+  background-color: rgba(26, 115, 232, 0.2); /* Niebieskie tło przy najechaniu */
+  color: #1a73e8 !important; /* Niebieski kolor tekstu przy najechaniu */
 }
 
 .content-wrapper {
-  margin-top: 110px; /* Dopasowanie marginesu górnego do wysokości obu sekcji navbaru */
-  padding: 20px; /* Dodanie odstępu dla lepszej prezentacji treści */
-  
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-top: 110px;
+  padding: 20px;
 }
 </style>

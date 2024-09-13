@@ -67,7 +67,7 @@
       <h1>Lista Pracowników</h1>
       <ul class="employee-list">
         <li v-for="(employee, index) in employees" :key="index" class="employee-item">
-          {{ employee.name }} ({{ employee.email }})
+          {{ employee.first_name }} {{ employee.last_name }} ({{ employee.email }})
           <button @click="confirmRemoveEmployee(index)" class="btn btn-danger">Usuń</button>
         </li>
       </ul>

@@ -1,14 +1,15 @@
 <template>
-  <div class="bg-primary text-white d-flex align-items-center justify-content-center my-5 mx-5 p-5" style="height: 70vh;">
-    <div>
+  <div class="user-info-container d-flex align-items-center justify-content-center">
+    <div class="user-info-box text-center">
       <h1>Welcome, {{ employeeName }}!</h1>
-      <p>You have <b>{{totalLeaveDays }}</b>  <i>(including <b>{{totalOnDemandLeaveDays }}</b> on demand days)</i> vacation days left for <b>{{ currentYear }}</b>.</p>
-      <p>You've already taken <b>{{ LeaveDaysTaken }}</b> vacation days this year!</p>
+      <p>You have <b>{{ totalLeaveDays }}</b> <i>(including <b>{{ totalOnDemandLeaveDays }}</b> on demand days)</i> vacation days left for <b>{{ currentYear }}</b>.</p>
+      <p>You've already taken <b>{{ totalLeaveDays }}</b> vacation days this year!</p>
       <!-- Conditionally display the paragraph only if nextVacationDate is not empty -->
-      <p v-if="nextVacationDate">Your next vacation starts on: {{ nextVacationDate }}</p>
+      <p v-if="nextVacationDate">Your next vacation starts on: <b>{{ nextVacationDate }}</b></p>
     </div>
   </div>
 </template>
+
 
 
 <script>
@@ -26,7 +27,6 @@ export default {
       currentYear: new Date().getFullYear(),
       totalLeaveDays: 0,
       totalOnDemandLeaveDays: 0,
-      LeaveDaysTaken: 0,
     };
   },
   created() {
@@ -143,16 +143,8 @@ export default {
         }
       });
 
-      this.LeaveDaysTaken = totalDays
-
       totalDays = 20 - totalDays;
       totalDemandDays = 4 - totalDemandDays;
-      if(totalDays < 0){
-        totalDays =0
-      }
-      if(totalDemandDays < 0){
-        totalDemandDays =0
-      }
 
       if (totalDemandDays > totalDays) {
         totalDemandDays = totalDays;
@@ -181,3 +173,41 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+
+.user-info-container {
+  height: 70vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: None; /* Używamy tła pierwotnie ustawionego w bg-primary */
+  padding: 20px;
+}
+
+.user-info-box {
+  background-color: white; /* Białe tło dla ramki */
+  color: #333; /* Kolor tekstu */
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Lekki cień */
+  border: 2px solid black; /* Czarny kontur 2px */
+  max-width: 600px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+b {
+  color: #1a73e8; /* Kolor akcentujący liczby */
+}
+</style>
+
